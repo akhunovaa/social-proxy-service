@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+//@Scope("prototype")
 @Component
-@Scope("prototype")
 public class Telegram extends TelegramLongPollingBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Telegram.class);
@@ -21,6 +21,7 @@ public class Telegram extends TelegramLongPollingBot {
     private String userName;
     private String token;
     private BotSession session;
+    private DefaultBotOptions options;
     private boolean registered;
 
     @Value(value = "${telegram.incoming.messages.topic.name}")
@@ -39,7 +40,6 @@ public class Telegram extends TelegramLongPollingBot {
         LOGGER.info("Update received: " + update.toString());
         LOGGER.info("<= sending {}", update.toString());
         kafkaTemplate.send(topicName, update);
-
     }
 
     public String getUserName() {
@@ -64,6 +64,10 @@ public class Telegram extends TelegramLongPollingBot {
 
     public void setSession(BotSession session) {
         this.session = session;
+    }
+
+    public void setOptions(DefaultBotOptions options) {
+        this.options = options;
     }
 
     @Override
@@ -97,6 +101,7 @@ public class Telegram extends TelegramLongPollingBot {
 
     private void registerBot() {
         session.setCallback(this);
+        session.setOptions(options);
         session.start();
     }
 

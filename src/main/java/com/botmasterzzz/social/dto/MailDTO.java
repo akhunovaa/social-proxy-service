@@ -12,6 +12,12 @@ public class MailDTO extends AbstractDto {
     private String subject;
     private String message;
 
+    public MailDTO() {
+    }
+
+    public MailDTO(String message) {
+        this.message = message;
+    }
 
     public class Builder {
 

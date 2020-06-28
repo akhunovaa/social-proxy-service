@@ -86,7 +86,7 @@
             <properties>
                 <build.profile.id>local</build.profile.id>
                 <skip.unit.tests>true</skip.unit.tests>
-                <log.level>DEBUG</log.level>
+                <log.level>INFO</log.level>
                 <allow.origin>true</allow.origin>
             </properties>
         </profile>
