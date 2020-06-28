@@ -17,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
@@ -29,6 +30,7 @@ import java.util.concurrent.Executor;
 import static org.modelmapper.config.Configuration.AccessLevel.PRIVATE;
 
 @EnableKafka
+@EnableScheduling
 @EnableAsync
 @EnableWebMvc
 @Configuration

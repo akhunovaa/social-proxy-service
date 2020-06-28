@@ -62,6 +62,7 @@
         <java-uuid-generator.version>4.0.1</java-uuid-generator.version>
         <modelmapper.version>2.3.7</modelmapper.version>
         <javax.mail.version>1.4.7</javax.mail.version>
+        <telegram-bot.version>1.0-SNAPSHOT</telegram-bot.version>
     </properties>
 
     <profiles>
@@ -539,6 +540,14 @@
             <artifactId>javax.mail</artifactId>
             <version>${javax.mail.version}</version>
         </dependency>
+
+        <!-- Telegram BOT -->
+        <dependency>
+            <groupId>com.botmasrerzzz.bot</groupId>
+            <artifactId>telegram-bot-core</artifactId>
+            <version>${telegram-bot.version}</version>
+        </dependency>
+
 
 
     </dependencies>

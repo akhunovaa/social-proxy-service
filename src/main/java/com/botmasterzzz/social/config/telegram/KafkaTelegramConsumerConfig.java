@@ -1,4 +1,4 @@
-package com.botmasterzzz.social.config;
+package com.botmasterzzz.social.config.telegram;
 
 import com.botmasterzzz.social.dto.AbstractDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -23,7 +23,7 @@ public class KafkaTelegramConsumerConfig {
     @Value("${kafka.server}")
     private String kafkaServer;
 
-    @Value("${social.telegram.group.id}")
+    @Value("${telegram.group.id}")
     private String groupId;
 
     @Bean

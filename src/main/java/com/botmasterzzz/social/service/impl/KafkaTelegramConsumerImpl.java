@@ -22,7 +22,7 @@ public class KafkaTelegramConsumerImpl {
     }
 
 
-    @KafkaListener(id = "telegram-proxy-service", topics = {"telegram-topic"}, containerFactory = "singleFactory")
+    @KafkaListener(id = "telegram-proxy-service", topics = {"telegram-outcome-messages"}, containerFactory = "singleFactory")
     public void consume(MailDTO mailDTO) {
         LOGGER.info("{} => consumed {}", LocalTime.now(), writeValueAsString(mailDTO));
         String recipient = mailDTO.getRecipient();
