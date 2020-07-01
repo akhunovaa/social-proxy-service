@@ -12,12 +12,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-//@Scope("prototype")
+@Scope("prototype")
 @Component
 public class Telegram extends TelegramLongPollingBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Telegram.class);
 
+    private Long instanceId;
     private String userName;
     private String token;
     private BotSession session;
@@ -37,9 +38,9 @@ public class Telegram extends TelegramLongPollingBot {
 
     @Override
     public synchronized void onUpdateReceived(final Update update) {
-        LOGGER.info("Update received: " + update.toString());
+        LOGGER.info("Update received for an instance: {} update: {}", this.instanceId, update.toString());
         LOGGER.info("<= sending {}", update.toString());
-        kafkaTemplate.send(topicName, update);
+        kafkaTemplate.send(topicName, this.instanceId, update);
     }
 
     public String getUserName() {
@@ -105,5 +106,11 @@ public class Telegram extends TelegramLongPollingBot {
         session.start();
     }
 
+    public Long getInstanceId() {
+        return instanceId;
+    }
 
+    public void setInstanceId(Long instanceId) {
+        this.instanceId = instanceId;
+    }
 }
