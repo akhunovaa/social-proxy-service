@@ -60,7 +60,7 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         taxiInstance.start();
 
         LOGGER.info("Telegram taxi bot after service restart has been started. {}", token);
-        botInstanceContainer.addTelegramBotInstance(instanceId, taxiInstance);
+        botInstanceContainer.addTelegramBotInstance(33L, taxiInstance);
         LOGGER.info("Telegram taxi bot after service restart has been added. {}", token);
     }
 
