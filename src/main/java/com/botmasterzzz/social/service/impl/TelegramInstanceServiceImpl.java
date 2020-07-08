@@ -29,11 +29,14 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
     @Value("${telegram.bot.token}")
     private String token;
 
+    @Value("${telegram.chelny.kazan.bot.token}")
+    private String taxiToken;
+
     @PostConstruct
     private void postConstruct() {
         BotSession botSession = new DefaultBotSession();
         String botName = "Zyxel";
-        Long instanceId = 1L;
+        Long instanceId = 31L;
         botSession.setToken(token);
         Telegram telegramInstance = applicationContext.getBean(Telegram.class);
         telegramInstance.setToken(token);
@@ -45,6 +48,20 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         LOGGER.info("Telegram bot after service restart has been started. {}", token);
         botInstanceContainer.addTelegramBotInstance(instanceId, telegramInstance);
         LOGGER.info("Telegram bot after service restart has been added. {}", token);
+
+        BotSession taxiBotSession = new DefaultBotSession();
+        taxiBotSession.setToken(taxiToken);
+        Telegram taxiInstance = applicationContext.getBean(Telegram.class);
+        taxiInstance.setToken(taxiToken);
+        taxiInstance.setUserName("Такси Челны Казань");
+        taxiInstance.setOptions(new DefaultBotOptions());
+        taxiInstance.setSession(taxiBotSession);
+        taxiInstance.setInstanceId(33L);
+        taxiInstance.start();
+
+        LOGGER.info("Telegram taxi bot after service restart has been started. {}", token);
+        botInstanceContainer.addTelegramBotInstance(instanceId, taxiInstance);
+        LOGGER.info("Telegram taxi bot after service restart has been added. {}", token);
     }
 
     @Autowired
