@@ -6,6 +6,8 @@ import com.botmasterzzz.bot.api.impl.methods.send.SendPhoto;
 import com.botmasterzzz.bot.api.impl.methods.send.SendVideo;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageReplyMarkup;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageText;
+import com.botmasterzzz.bot.api.impl.objects.InputFile;
+import com.botmasterzzz.bot.api.impl.objects.Message;
 import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
 import com.botmasterzzz.bot.exceptions.TelegramApiException;
 import com.botmasterzzz.social.config.telegram.BotInstanceContainer;
@@ -13,11 +15,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalTime;
 
@@ -27,6 +33,12 @@ public class KafkaTelegramConsumerImpl {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaTelegramConsumerImpl.class);
 
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    private KafkaTemplate<String, Message> kafkaMessageTemplate;
+
+    @Value(value = "${telegram.message.callback.topic.name}")
+    private String topicName;
 
     private static BotInstanceContainer botInstanceContainer = BotInstanceContainer.getInstanse();
 
@@ -47,7 +59,17 @@ public class KafkaTelegramConsumerImpl {
                 }
                 case "SendVideo": {
                     SendVideo method = objectMapper.readValue(apiMethod.getData(), SendVideo.class);
-                    botInstanceContainer.getBotInstance(key).executeVideo(method);
+                    String fileName = method.getVideo().getAttachName();
+                    File uploadVideoFile = new File(fileName);
+                    if (uploadVideoFile.exists()) {
+                        method.setVideoInputFile(new InputFile(uploadVideoFile, "upload_file"));
+                        LOGGER.info("File from local send {}", uploadVideoFile);
+                    }
+                    Message responseMessage = botInstanceContainer.getBotInstance(key).executeVideo(method);
+                    if (uploadVideoFile.exists()) {
+                        kafkaMessageTemplate.send(topicName, fileName, responseMessage);
+                    }
+                    LOGGER.info(responseMessage.getText());
                     break;
                 }
                 case "SendDocument": {
