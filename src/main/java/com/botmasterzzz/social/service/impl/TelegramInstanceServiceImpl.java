@@ -67,7 +67,7 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         LOGGER.info("Telegram taxi bot after service restart has been added. {}", token);
 
         BotSession getpartsBotSession = new DefaultBotSession();
-        taxiBotSession.setToken(getPartsToken);
+        getpartsBotSession.setToken(getPartsToken);
         Telegram getpartsInstance = applicationContext.getBean(Telegram.class);
         getpartsInstance.setToken(getPartsToken);
         getpartsInstance.setUserName("GetParts24.ru");
