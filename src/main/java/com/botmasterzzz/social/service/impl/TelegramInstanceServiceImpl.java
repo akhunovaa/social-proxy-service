@@ -32,6 +32,9 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
     @Value("${telegram.chelny.kazan.bot.token}")
     private String taxiToken;
 
+    @Value("${telegram.getparts.bot.token}")
+    private String getPartsToken;
+
     @PostConstruct
     private void postConstruct() {
         BotSession botSession = new DefaultBotSession();
@@ -62,6 +65,20 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         LOGGER.info("Telegram taxi bot after service restart has been started. {}", token);
         botInstanceContainer.addTelegramBotInstance(33L, taxiInstance);
         LOGGER.info("Telegram taxi bot after service restart has been added. {}", token);
+
+        BotSession getpartsBotSession = new DefaultBotSession();
+        taxiBotSession.setToken(getPartsToken);
+        Telegram getpartsInstance = applicationContext.getBean(Telegram.class);
+        getpartsInstance.setToken(getPartsToken);
+        getpartsInstance.setUserName("GetParts24.ru");
+        getpartsInstance.setOptions(new DefaultBotOptions());
+        getpartsInstance.setSession(getpartsBotSession);
+        getpartsInstance.setInstanceId(1L);
+        getpartsInstance.start();
+
+        LOGGER.info("Telegram GetParts24.ru bot after service restart has been started. {}", token);
+        botInstanceContainer.addTelegramBotInstance(1L, getpartsInstance);
+        LOGGER.info("Telegram GetParts24.ru bot after service restart has been added. {}", token);
     }
 
     @Autowired
