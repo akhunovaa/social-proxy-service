@@ -35,6 +35,9 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
     @Value("${telegram.getparts.bot.token}")
     private String getPartsToken;
 
+    @Value("${telegram.antiparkon.bot.token}")
+    private String antiparkonToken;
+
     @PostConstruct
     private void postConstruct() {
         BotSession botSession = new DefaultBotSession();
@@ -79,6 +82,20 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         LOGGER.info("Telegram GetParts24.ru bot after service restart has been started. {}", token);
         botInstanceContainer.addTelegramBotInstance(1L, getpartsInstance);
         LOGGER.info("Telegram GetParts24.ru bot after service restart has been added. {}", token);
+
+        BotSession antiparkonBotSession = new DefaultBotSession();
+        antiparkonBotSession.setToken(antiparkonToken);
+        Telegram antiparkonInstance = applicationContext.getBean(Telegram.class);
+        antiparkonInstance.setToken(antiparkonToken);
+        antiparkonInstance.setUserName("АнтиПаркон");
+        antiparkonInstance.setOptions(new DefaultBotOptions());
+        antiparkonInstance.setSession(antiparkonBotSession);
+        antiparkonInstance.setInstanceId(35L);//35L prod
+        antiparkonInstance.start();
+
+        LOGGER.info("Telegram AntiParkon bot after service restart has been started. {}", token);
+        botInstanceContainer.addTelegramBotInstance(35L, antiparkonInstance);
+        LOGGER.info("Telegram AntiParkon bot after service restart has been added. {}", token);
     }
 
     @Autowired
