@@ -29,6 +29,9 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
     @Value("${telegram.bot.token}")
     private String token;
 
+    @Value("${telegram.rune.bot.token}")
+    private String runeBotToken;
+
     @Value("${telegram.chelny.kazan.bot.token}")
     private String taxiToken;
 
@@ -57,6 +60,20 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         LOGGER.info("Telegram bot after service restart has been started. {}", token);
         botInstanceContainer.addTelegramBotInstance(instanceId, telegramInstance);
         LOGGER.info("Telegram bot after service restart has been added. {}", token);
+
+        BotSession runeBotSession = new DefaultBotSession();
+        runeBotSession.setToken(runeBotToken);
+        Telegram runeBotInstance = applicationContext.getBean(Telegram.class);
+        runeBotInstance.setToken(runeBotToken);
+        runeBotInstance.setUserName("Руна Дня / Совет Рун");
+        runeBotInstance.setOptions(new DefaultBotOptions());
+        runeBotInstance.setSession(runeBotSession);
+        runeBotInstance.setInstanceId(38L);
+        runeBotInstance.start();
+
+        LOGGER.info("Telegram Rune of Day bot after service restart has been started. {}", runeBotToken);
+        botInstanceContainer.addTelegramBotInstance(38L, runeBotInstance);
+        LOGGER.info("Telegram Rune of Day bot after service restart has been added. {}", runeBotToken);
 
         BotSession taxiBotSession = new DefaultBotSession();
         taxiBotSession.setToken(taxiToken);
