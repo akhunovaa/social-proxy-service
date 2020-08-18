@@ -1,9 +1,7 @@
 package com.botmasterzzz.social.service.impl;
 
-import com.botmasterzzz.bot.api.impl.methods.send.SendDocument;
-import com.botmasterzzz.bot.api.impl.methods.send.SendMessage;
-import com.botmasterzzz.bot.api.impl.methods.send.SendPhoto;
-import com.botmasterzzz.bot.api.impl.methods.send.SendVideo;
+import com.botmasterzzz.bot.api.impl.methods.ActionType;
+import com.botmasterzzz.bot.api.impl.methods.send.*;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageReplyMarkup;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageText;
 import com.botmasterzzz.bot.api.impl.objects.InputFile;
@@ -54,11 +52,21 @@ public class KafkaTelegramConsumerImpl {
             switch (type) {
                 case "SendPhoto": {
                     SendPhoto method = objectMapper.readValue(apiMethod.getData(), SendPhoto.class);
+                    String chatId = method.getChatId();
+                    SendChatAction sendChatAction = new SendChatAction();
+                    sendChatAction.setAction(ActionType.UPLOADPHOTO);
+                    sendChatAction.setChatId(chatId);
+                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
                     botInstanceContainer.getBotInstance(key).executePhoto(method);
                     break;
                 }
                 case "SendVideo": {
                     SendVideo method = objectMapper.readValue(apiMethod.getData(), SendVideo.class);
+                    String chatId = method.getChatId();
+                    SendChatAction sendChatAction = new SendChatAction();
+                    sendChatAction.setAction(ActionType.UPLOADVIDEO);
+                    sendChatAction.setChatId(chatId);
+                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
                     String fileName = method.getVideo().getAttachName();
                     File uploadVideoFile = new File(fileName);
                     if (uploadVideoFile.exists()) {
@@ -74,21 +82,41 @@ public class KafkaTelegramConsumerImpl {
                 }
                 case "SendDocument": {
                     SendDocument method = objectMapper.readValue(apiMethod.getData(), SendDocument.class);
+                    String chatId = method.getChatId();
+                    SendChatAction sendChatAction = new SendChatAction();
+                    sendChatAction.setAction(ActionType.UPLOADVIDEO);
+                    sendChatAction.setChatId(chatId);
+                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
                     botInstanceContainer.getBotInstance(key).executeDocument(method);
                     break;
                 }
                 case "EditMessageText": {
                     EditMessageText method = objectMapper.readValue(apiMethod.getData(), EditMessageText.class);
+                    String chatId = method.getChatId();
+                    SendChatAction sendChatAction = new SendChatAction();
+                    sendChatAction.setAction(ActionType.TYPING);
+                    sendChatAction.setChatId(chatId);
+                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
                     botInstanceContainer.getBotInstance(key).execute(method);
                     break;
                 }
                 case "EditMessageReplyMarkup": {
                     EditMessageReplyMarkup method = objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class);
+                    String chatId = method.getChatId();
+                    SendChatAction sendChatAction = new SendChatAction();
+                    sendChatAction.setAction(ActionType.TYPING);
+                    sendChatAction.setChatId(chatId);
+                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
                     botInstanceContainer.getBotInstance(key).execute(method);
                     break;
                 }
                 default: {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    String chatId = method.getChatId();
+                    SendChatAction sendChatAction = new SendChatAction();
+                    sendChatAction.setAction(ActionType.TYPING);
+                    sendChatAction.setChatId(chatId);
+                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
                     botInstanceContainer.getBotInstance(key).execute(method);
                     break;
                 }
