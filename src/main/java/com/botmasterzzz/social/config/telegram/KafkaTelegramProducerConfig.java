@@ -2,8 +2,9 @@ package com.botmasterzzz.social.config.telegram;
 
 import com.botmasterzzz.bot.api.impl.objects.Message;
 import com.botmasterzzz.bot.api.impl.objects.Update;
+import com.botmasterzzz.social.dto.KafkaKeyDTO;
+import com.botmasterzzz.social.serializer.KafkaKeySerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,9 +31,9 @@ public class KafkaTelegramProducerConfig {
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaKeySerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
+        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, true);
         return props;
     }
 
@@ -47,7 +48,7 @@ public class KafkaTelegramProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<Long, Update> producerFactory() {
+    public ProducerFactory<KafkaKeyDTO, Update> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
@@ -57,8 +58,8 @@ public class KafkaTelegramProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<Long, Update> kafkaTemplate() {
-        KafkaTemplate<Long, Update> template = new KafkaTemplate<>(producerFactory());
+    public KafkaTemplate<KafkaKeyDTO, Update> kafkaTemplate() {
+        KafkaTemplate<KafkaKeyDTO, Update> template = new KafkaTemplate<>(producerFactory());
         template.setMessageConverter(new StringJsonMessageConverter());
         return template;
     }

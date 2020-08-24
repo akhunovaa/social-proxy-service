@@ -9,6 +9,7 @@ import com.botmasterzzz.bot.api.impl.objects.Message;
 import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
 import com.botmasterzzz.bot.exceptions.TelegramApiException;
 import com.botmasterzzz.social.config.telegram.BotInstanceContainer;
+import com.botmasterzzz.social.dto.KafkaKeyDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -32,22 +33,23 @@ public class KafkaTelegramConsumerImpl {
 
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    private KafkaTemplate<String, Message> kafkaMessageTemplate;
+    private final KafkaTemplate<String, Message> kafkaMessageTemplate;
 
     @Value(value = "${telegram.message.callback.topic.name}")
     private String topicName;
 
     private static BotInstanceContainer botInstanceContainer = BotInstanceContainer.getInstanse();
 
-    public KafkaTelegramConsumerImpl(ObjectMapper objectMapper) {
+    public KafkaTelegramConsumerImpl(ObjectMapper objectMapper, KafkaTemplate<String, Message> kafkaMessageTemplate) {
         this.objectMapper = objectMapper;
+        this.kafkaMessageTemplate = kafkaMessageTemplate;
     }
 
     @KafkaListener(id = "telegram-message-service", topics = {"telegram-outcome-messages"}, containerFactory = "singleFactory")
-    public void consumeMessage(@Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) Long key, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, OutgoingMessage apiMethod) {
+    public void consumeMessage(@Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) KafkaKeyDTO kafkaKeyDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, OutgoingMessage apiMethod) {
         LOGGER.info("{} => consumed {}", LocalTime.now(), writeValueAsString(apiMethod));
         String type = apiMethod.getTypeMessage();
+        Long instanceId = kafkaKeyDTO.getInstanceKey();
         try {
             switch (type) {
                 case "SendPhoto": {
@@ -56,8 +58,8 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.UPLOADPHOTO);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(key).executePhoto(method);
+                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                    botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
                     break;
                 }
                 case "SendVideo": {
@@ -66,14 +68,14 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.UPLOADVIDEO);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
+                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                     String fileName = method.getVideo().getAttachName();
                     File uploadVideoFile = new File(fileName);
                     if (uploadVideoFile.exists()) {
                         method.setVideoInputFile(new InputFile(uploadVideoFile, "upload_file"));
                         LOGGER.info("File from local send {}", uploadVideoFile);
                     }
-                    Message responseMessage = botInstanceContainer.getBotInstance(key).executeVideo(method);
+                    Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                     if (uploadVideoFile.exists()) {
                         kafkaMessageTemplate.send(topicName, fileName, responseMessage);
                     }
@@ -86,8 +88,8 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.UPLOADVIDEO);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(key).executeDocument(method);
+                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                    botInstanceContainer.getBotInstance(instanceId).executeDocument(method);
                     break;
                 }
                 case "EditMessageText": {
@@ -96,8 +98,8 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.TYPING);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(key).execute(method);
+                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                    botInstanceContainer.getBotInstance(instanceId).execute(method);
                     break;
                 }
                 case "EditMessageReplyMarkup": {
@@ -106,8 +108,8 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.TYPING);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(key).execute(method);
+                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                    botInstanceContainer.getBotInstance(instanceId).execute(method);
                     break;
                 }
                 default: {
@@ -116,8 +118,8 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.TYPING);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(key).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(key).execute(method);
+                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                    botInstanceContainer.getBotInstance(instanceId).execute(method);
                     break;
                 }
             }

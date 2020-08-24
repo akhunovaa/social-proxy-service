@@ -4,6 +4,7 @@ import com.botmasterzzz.bot.TelegramLongPollingBot;
 import com.botmasterzzz.bot.api.impl.objects.Update;
 import com.botmasterzzz.bot.bot.DefaultBotOptions;
 import com.botmasterzzz.bot.generic.BotSession;
+import com.botmasterzzz.social.dto.KafkaKeyDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,10 @@ public class Telegram extends TelegramLongPollingBot {
     @Value(value = "${telegram.incoming.messages.topic.name}")
     private String topicName;
 
-    private KafkaTemplate<Long, Update> kafkaTemplate;
+    private final KafkaTemplate<KafkaKeyDTO, Update> kafkaTemplate;
 
     @Autowired
-    public Telegram(KafkaTemplate<Long, Update> kafkaTemplate) {
+    public Telegram(KafkaTemplate<KafkaKeyDTO, Update> kafkaTemplate) {
         super(new DefaultBotOptions());
         this.kafkaTemplate = kafkaTemplate;
     }
@@ -40,7 +41,10 @@ public class Telegram extends TelegramLongPollingBot {
     public synchronized void onUpdateReceived(final Update update) {
         LOGGER.info("Update received for an instance: {} update: {}", this.instanceId, update.toString());
         LOGGER.info("<= sending {}", update.toString());
-        kafkaTemplate.send(topicName, this.instanceId, update);
+        KafkaKeyDTO kafkaKeyDTO = new KafkaKeyDTO();
+        kafkaKeyDTO.setInstanceKey(this.instanceId);
+        kafkaKeyDTO.setUpdateId(update.getUpdateId());
+        kafkaTemplate.send(topicName, kafkaKeyDTO, update);
     }
 
     public String getUserName() {
