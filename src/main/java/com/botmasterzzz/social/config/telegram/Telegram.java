@@ -1,8 +1,11 @@
 package com.botmasterzzz.social.config.telegram;
 
 import com.botmasterzzz.bot.TelegramLongPollingBot;
+import com.botmasterzzz.bot.api.impl.methods.ActionType;
+import com.botmasterzzz.bot.api.impl.methods.send.SendChatAction;
 import com.botmasterzzz.bot.api.impl.objects.Update;
 import com.botmasterzzz.bot.bot.DefaultBotOptions;
+import com.botmasterzzz.bot.exceptions.TelegramApiException;
 import com.botmasterzzz.bot.generic.BotSession;
 import com.botmasterzzz.social.dto.KafkaKeyDTO;
 import org.slf4j.Logger;
@@ -39,12 +42,21 @@ public class Telegram extends TelegramLongPollingBot {
 
     @Override
     public synchronized void onUpdateReceived(final Update update) {
+        Long chatId = update.hasMessage() ? update.getMessage().getChatId() : update.getCallbackQuery().getMessage().getChatId();
         LOGGER.info("Update received for an instance: {} update: {}", this.instanceId, update.toString());
         LOGGER.info("<= sending {}", update.toString());
         KafkaKeyDTO kafkaKeyDTO = new KafkaKeyDTO();
         kafkaKeyDTO.setInstanceKey(this.instanceId);
         kafkaKeyDTO.setUpdateId(update.getUpdateId());
         kafkaTemplate.send(topicName, kafkaKeyDTO, update);
+        SendChatAction sendChatAction = new SendChatAction();
+        sendChatAction.setAction(ActionType.TYPING);
+        sendChatAction.setChatId(chatId);
+        try {
+            execute(sendChatAction);
+        } catch (TelegramApiException telegramApiException) {
+            LOGGER.error("ERROR TelegramApiException", telegramApiException);
+        }
     }
 
     public String getUserName() {
