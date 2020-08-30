@@ -42,21 +42,12 @@ public class Telegram extends TelegramLongPollingBot {
 
     @Override
     public synchronized void onUpdateReceived(final Update update) {
-        Long chatId = update.hasMessage() ? update.getMessage().getChatId() : update.getCallbackQuery().getMessage().getChatId();
         LOGGER.info("Update received for an instance: {} update: {}", this.instanceId, update.toString());
         LOGGER.info("<= sending {}", update.toString());
         KafkaKeyDTO kafkaKeyDTO = new KafkaKeyDTO();
         kafkaKeyDTO.setInstanceKey(this.instanceId);
         kafkaKeyDTO.setUpdateId(update.getUpdateId());
         kafkaTemplate.send(topicName, kafkaKeyDTO, update);
-        SendChatAction sendChatAction = new SendChatAction();
-        sendChatAction.setAction(ActionType.TYPING);
-        sendChatAction.setChatId(chatId);
-        try {
-            execute(sendChatAction);
-        } catch (TelegramApiException telegramApiException) {
-            LOGGER.error("ERROR TelegramApiException", telegramApiException);
-        }
     }
 
     public String getUserName() {
