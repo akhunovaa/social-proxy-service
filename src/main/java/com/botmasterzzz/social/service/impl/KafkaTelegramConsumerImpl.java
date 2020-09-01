@@ -2,6 +2,7 @@ package com.botmasterzzz.social.service.impl;
 
 import com.botmasterzzz.bot.api.impl.methods.ActionType;
 import com.botmasterzzz.bot.api.impl.methods.send.*;
+import com.botmasterzzz.bot.api.impl.methods.update.DeleteMessage;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageReplyMarkup;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageText;
 import com.botmasterzzz.bot.api.impl.objects.InputFile;
@@ -109,6 +110,11 @@ public class KafkaTelegramConsumerImpl {
                     sendChatAction.setAction(ActionType.TYPING);
                     sendChatAction.setChatId(chatId);
                     botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                    botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    break;
+                }
+                case "DeleteMessage": {
+                    DeleteMessage method = objectMapper.readValue(apiMethod.getData(), DeleteMessage.class);
                     botInstanceContainer.getBotInstance(instanceId).execute(method);
                     break;
                 }
