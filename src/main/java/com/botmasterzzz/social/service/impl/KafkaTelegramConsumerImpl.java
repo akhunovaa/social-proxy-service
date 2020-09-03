@@ -47,7 +47,13 @@ public class KafkaTelegramConsumerImpl {
 
     @KafkaListener(id = "telegram-message-service", topics = {"telegram-outcome-messages"}, containerFactory = "singleFactory")
     public void consumeMessage(@Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) KafkaKeyDTO kafkaKeyDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, OutgoingMessage apiMethod) {
-        LOGGER.info("{} => consumed {}", LocalTime.now(), writeValueAsString(apiMethod));
+        String logValue = null;
+        try {
+            logValue = writeValueAsString(apiMethod);
+        } catch (IOException e) {
+            LOGGER.error("Deserialize error", e);
+        }
+        LOGGER.info("=> consumed {}", logValue);
         String type = apiMethod.getTypeMessage();
         Long instanceId = kafkaKeyDTO.getInstanceKey();
         try {
@@ -155,11 +161,30 @@ public class KafkaTelegramConsumerImpl {
     }
 
 
-    private String writeValueAsString(OutgoingMessage apiMethod) {
-        try {
-            return objectMapper.writeValueAsString(apiMethod.getData());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Writing value to JSON failed: " + apiMethod.toString());
-        }
+    private String writeValueAsString(OutgoingMessage apiMethod) throws IOException {
+        String type = apiMethod.getTypeMessage();
+                switch (type) {
+                    case "SendPhoto": {
+                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendPhoto.class));
+                    }
+                    case "SendVideo": {
+                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendVideo.class));
+                    }
+                    case "SendDocument": {
+                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendDocument.class));
+                    }
+                    case "EditMessageText": {
+                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), EditMessageText.class));
+                    }
+                    case "EditMessageReplyMarkup": {
+                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class));
+                    }
+                    case "DeleteMessage":{
+                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), DeleteMessage.class));
+                    }
+                    default: {
+                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendMessage.class));
+                    }
+                }
     }
 }
