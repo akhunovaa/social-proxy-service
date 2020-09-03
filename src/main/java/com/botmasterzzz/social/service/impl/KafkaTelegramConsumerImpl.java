@@ -15,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -59,8 +58,13 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.UPLOADPHOTO);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                        Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
+                        LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a photo to Telegram", telegramApiException);
+                    }
                     break;
                 }
                 case "SendVideo": {
@@ -69,18 +73,22 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.UPLOADVIDEO);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
-                    String fileName = method.getVideo().getAttachName();
-                    File uploadVideoFile = new File(fileName);
-                    if (uploadVideoFile.exists()) {
-                        method.setVideoInputFile(new InputFile(uploadVideoFile, "upload_file"));
-                        LOGGER.info("File from local send {}", uploadVideoFile);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                        String fileName = method.getVideo().getAttachName();
+                        File uploadVideoFile = new File(fileName);
+                        if (uploadVideoFile.exists()) {
+                            method.setVideoInputFile(new InputFile(uploadVideoFile, "upload_file"));
+                            LOGGER.info("File from local send {}", uploadVideoFile);
+                        }
+                        Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
+                        LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
+                        if (uploadVideoFile.exists()) {
+                            kafkaMessageTemplate.send(topicName, fileName, responseMessage);
+                        }
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a video to Telegram", telegramApiException);
                     }
-                    Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
-                    if (uploadVideoFile.exists()) {
-                        kafkaMessageTemplate.send(topicName, fileName, responseMessage);
-                    }
-                    LOGGER.info(responseMessage.getText());
                     break;
                 }
                 case "SendDocument": {
@@ -89,33 +97,40 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.UPLOADVIDEO);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(instanceId).executeDocument(method);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                        Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeDocument(method);
+                        LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a Document to Telegram", telegramApiException);
+                    }
                     break;
                 }
                 case "EditMessageText": {
                     EditMessageText method = objectMapper.readValue(apiMethod.getData(), EditMessageText.class);
-                    String chatId = method.getChatId();
-                    SendChatAction sendChatAction = new SendChatAction();
-                    sendChatAction.setAction(ActionType.TYPING);
-                    sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a EditMessageText to Telegram", telegramApiException);
+                    }
                     break;
                 }
                 case "EditMessageReplyMarkup": {
                     EditMessageReplyMarkup method = objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class);
-                    String chatId = method.getChatId();
-                    SendChatAction sendChatAction = new SendChatAction();
-                    sendChatAction.setAction(ActionType.TYPING);
-                    sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a EditMessageReplyMarkup to Telegram", telegramApiException);
+                    }
                     break;
                 }
                 case "DeleteMessage": {
                     DeleteMessage method = objectMapper.readValue(apiMethod.getData(), DeleteMessage.class);
-                    botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a DeleteMessage to Telegram", telegramApiException);
+                    }
                     break;
                 }
                 default: {
@@ -124,20 +139,25 @@ public class KafkaTelegramConsumerImpl {
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.TYPING);
                     sendChatAction.setChatId(chatId);
-                    botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
-                    botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
+                        Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a SendMessage to Telegram", telegramApiException);
+                    }
                     break;
                 }
             }
-        } catch (TelegramApiException | IOException ex) {
-            LOGGER.error("ERROR TelegramApiException", ex);
+        } catch (IOException ex) {
+            LOGGER.error("ERROR IOException", ex);
         }
     }
 
 
     private String writeValueAsString(OutgoingMessage apiMethod) {
         try {
-            return objectMapper.writeValueAsString(apiMethod);
+            return objectMapper.writeValueAsString(apiMethod.getData());
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Writing value to JSON failed: " + apiMethod.toString());
         }
