@@ -89,9 +89,9 @@ public class KafkaTelegramConsumerImpl {
                         }
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
-                        if (uploadVideoFile.exists()) {
-                            kafkaMessageTemplate.send(topicName, fileName, responseMessage);
-                        }
+//                        if (uploadVideoFile.exists()) {
+//                            kafkaMessageTemplate.send(topicName, fileName, responseMessage);
+//                        }
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a video to Telegram", telegramApiException);
                     }
