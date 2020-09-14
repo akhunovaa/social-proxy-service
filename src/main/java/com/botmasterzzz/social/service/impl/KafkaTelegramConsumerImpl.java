@@ -151,20 +151,14 @@ public class KafkaTelegramConsumerImpl {
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
                         if (loading) {
                             Integer messageId = responseMessage.getMessageId();
-                            for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
-                                botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
-                                try {
-                                    Thread.sleep(300L);
-                                } catch (InterruptedException exception) {
-                                    LOGGER.error("Loading thread sleep exception", exception);
-                                }
-                            }
-                            for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
-                                botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
-                                try {
-                                    Thread.sleep(300L);
-                                } catch (InterruptedException exception) {
-                                    LOGGER.error("Loading thread sleep exception", exception);
+                            for (int i = 0; i < 2; i++) {
+                                for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
+                                    botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
+                                    try {
+                                        Thread.sleep(500L);
+                                    } catch (InterruptedException exception) {
+                                        LOGGER.error("Loading thread sleep exception", exception);
+                                    }
                                 }
                             }
                             DeleteMessage deleteMethod = new DeleteMessage();
