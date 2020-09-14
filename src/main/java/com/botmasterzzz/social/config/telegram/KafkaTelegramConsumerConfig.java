@@ -31,6 +31,7 @@ public class KafkaTelegramConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(messageConsumerFactory());
         factory.setBatchListener(false);
+        factory.setConcurrency(5);
         factory.setMessageConverter(new StringJsonMessageConverter());
         return factory;
     }
