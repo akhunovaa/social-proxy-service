@@ -11,7 +11,6 @@ import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
 import com.botmasterzzz.bot.exceptions.TelegramApiException;
 import com.botmasterzzz.social.config.telegram.BotInstanceContainer;
 import com.botmasterzzz.social.dto.KafkaKeyDTO;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class KafkaTelegramConsumerImpl {
@@ -38,7 +38,7 @@ public class KafkaTelegramConsumerImpl {
     @Value(value = "${telegram.message.callback.topic.name}")
     private String topicName;
 
-    private static BotInstanceContainer botInstanceContainer = BotInstanceContainer.getInstanse();
+    private static final BotInstanceContainer botInstanceContainer = BotInstanceContainer.getInstanse();
 
     public KafkaTelegramConsumerImpl(ObjectMapper objectMapper, KafkaTemplate<String, Message> kafkaMessageTemplate) {
         this.objectMapper = objectMapper;
@@ -141,6 +141,7 @@ public class KafkaTelegramConsumerImpl {
                 }
                 default: {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    boolean loading = kafkaKeyDTO.isLoading();
                     String chatId = method.getChatId();
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.TYPING);
@@ -148,6 +149,34 @@ public class KafkaTelegramConsumerImpl {
                     try {
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        if (loading) {
+                            Integer messageId = responseMessage.getMessageId();
+                            for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
+                                botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
+                                try {
+                                    Thread.sleep(300L);
+                                } catch (InterruptedException exception) {
+                                    LOGGER.error("Loading thread sleep exception", exception);
+                                }
+                            }
+                            for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
+                                botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
+                                try {
+                                    Thread.sleep(300L);
+                                } catch (InterruptedException exception) {
+                                    LOGGER.error("Loading thread sleep exception", exception);
+                                }
+                            }
+                            DeleteMessage deleteMethod = new DeleteMessage();
+                            deleteMethod.setMessageId(messageId);
+                            deleteMethod.setChatId(chatId);
+                            try {
+                                botInstanceContainer.getBotInstance(instanceId).execute(deleteMethod);
+                            } catch (TelegramApiException telegramApiException) {
+                                LOGGER.error("Error to send a loading DeleteMessage to Telegram", telegramApiException);
+                            }
+
+                        }
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a SendMessage to Telegram", telegramApiException);
@@ -163,28 +192,59 @@ public class KafkaTelegramConsumerImpl {
 
     private String writeValueAsString(OutgoingMessage apiMethod) throws IOException {
         String type = apiMethod.getTypeMessage();
-                switch (type) {
-                    case "SendPhoto": {
-                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendPhoto.class));
-                    }
-                    case "SendVideo": {
-                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendVideo.class));
-                    }
-                    case "SendDocument": {
-                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendDocument.class));
-                    }
-                    case "EditMessageText": {
-                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), EditMessageText.class));
-                    }
-                    case "EditMessageReplyMarkup": {
-                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class));
-                    }
-                    case "DeleteMessage":{
-                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), DeleteMessage.class));
-                    }
-                    default: {
-                        return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendMessage.class));
-                    }
-                }
+        switch (type) {
+            case "SendPhoto": {
+                return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendPhoto.class));
+            }
+            case "SendVideo": {
+                return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendVideo.class));
+            }
+            case "SendDocument": {
+                return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendDocument.class));
+            }
+            case "EditMessageText": {
+                return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), EditMessageText.class));
+            }
+            case "EditMessageReplyMarkup": {
+                return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class));
+            }
+            case "DeleteMessage": {
+                return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), DeleteMessage.class));
+            }
+            default: {
+                return objectMapper.writeValueAsString(objectMapper.readValue(apiMethod.getData(), SendMessage.class));
+            }
+        }
     }
+
+    public List<EditMessageText> loadingAnimation(String chatId, Integer messageId) {
+        List<EditMessageText> mailingData = new ArrayList<>();
+
+        EditMessageText editMessageTextOne = new EditMessageText();
+        editMessageTextOne.setChatId(chatId);
+        editMessageTextOne.setText("^('-')^");
+        editMessageTextOne.setMessageId(messageId);
+        mailingData.add(editMessageTextOne);
+
+        EditMessageText editMessageTextTwo = new EditMessageText();
+        editMessageTextTwo.setChatId(chatId);
+        editMessageTextTwo.setText("<('-'<)");
+        editMessageTextTwo.setMessageId(messageId);
+        mailingData.add(editMessageTextTwo);
+
+        EditMessageText editMessageTextThree = new EditMessageText();
+        editMessageTextThree.setChatId(chatId);
+        editMessageTextThree.setText("^('-')^");
+        editMessageTextThree.setMessageId(messageId);
+        mailingData.add(editMessageTextThree);
+
+        EditMessageText editMessageTextFour = new EditMessageText();
+        editMessageTextFour.setChatId(chatId);
+        editMessageTextFour.setText("(>'-')>");
+        editMessageTextFour.setMessageId(messageId);
+        mailingData.add(editMessageTextFour);
+
+        return mailingData;
+    }
+
 }
