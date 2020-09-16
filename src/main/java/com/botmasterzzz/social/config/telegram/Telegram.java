@@ -41,7 +41,7 @@ public class Telegram extends TelegramLongPollingBot {
     }
 
     @Override
-    public synchronized void onUpdateReceived(final Update update) {
+    public void onUpdateReceived(final Update update) {
         LOGGER.info("Update received for an instance: {} update: {}", this.instanceId, update.toString());
         LOGGER.info("<= sending {}", update.toString());
         KafkaKeyDTO kafkaKeyDTO = new KafkaKeyDTO();
