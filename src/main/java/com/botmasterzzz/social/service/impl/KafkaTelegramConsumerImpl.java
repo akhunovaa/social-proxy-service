@@ -1,6 +1,7 @@
 package com.botmasterzzz.social.service.impl;
 
 import com.botmasterzzz.bot.api.impl.methods.ActionType;
+import com.botmasterzzz.bot.api.impl.methods.AnswerInlineQuery;
 import com.botmasterzzz.bot.api.impl.methods.send.*;
 import com.botmasterzzz.bot.api.impl.methods.update.DeleteMessage;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageReplyMarkup;
@@ -8,6 +9,7 @@ import com.botmasterzzz.bot.api.impl.methods.update.EditMessageText;
 import com.botmasterzzz.bot.api.impl.objects.InputFile;
 import com.botmasterzzz.bot.api.impl.objects.Message;
 import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
+import com.botmasterzzz.bot.api.impl.objects.inlinequery.result.InlineQueryResultVideo;
 import com.botmasterzzz.bot.exceptions.TelegramApiException;
 import com.botmasterzzz.social.config.telegram.BotInstanceContainer;
 import com.botmasterzzz.social.dto.KafkaKeyDTO;
@@ -134,6 +136,20 @@ public class KafkaTelegramConsumerImpl {
                     DeleteMessage method = objectMapper.readValue(apiMethod.getData(), DeleteMessage.class);
                     try {
                         botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a DeleteMessage to Telegram", telegramApiException);
+                    }
+                    break;
+                }
+                case "InlineQueryResultVideo": {
+                    InlineQueryResultVideo method = objectMapper.readValue(apiMethod.getData(), InlineQueryResultVideo.class);
+                    try {
+                        method.setThumbUrl("https://www.youtube.com/watch?v=PY39bKF7fK4");
+                        AnswerInlineQuery answerInlineQuery = new AnswerInlineQuery();
+                        answerInlineQuery.setResults(method);
+                        answerInlineQuery.setInlineQueryId(method.getId());
+                        answerInlineQuery.setPersonal(false);
+                        botInstanceContainer.getBotInstance(instanceId).execute(answerInlineQuery);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a DeleteMessage to Telegram", telegramApiException);
                     }
