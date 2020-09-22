@@ -7,7 +7,7 @@ replicaCount: 4
 env: dev
 
 image:
-  repository: rusberbank.ru/botmasterzzz-socail-proxy-service
+  repository: rusberbank.ru/botmasterzzz-social-proxy-service
   appVersion: 2
   pullPolicy: IfNotPresent
 
@@ -86,4 +86,4 @@ tolerations: []
 affinity: {}
 
 labelSelectors:
-  - app: botmasterzzz-socail-proxy-service
+  - app: botmasterzzz-social-proxy-service

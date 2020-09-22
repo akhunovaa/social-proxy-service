@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: rusberbank.ru/botmasterzzz-socail-proxy-service
+      image: rusberbank.ru/botmasterzzz-social-proxy-service
       command: ['wget']
       args:  ['{{ include "fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

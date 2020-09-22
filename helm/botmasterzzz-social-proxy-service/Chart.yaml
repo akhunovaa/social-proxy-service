@@ -1,5 +1,5 @@
 apiVersion: v2
-name: botmasterzzz-socail-proxy-service
+name: botmasterzzz-social-proxy-service
 description: Cервис для работы c социальными сетями, к примеру по отправке сообщений к VK или в Telegram
 
 # A chart can be either an 'application' or a 'library' chart.

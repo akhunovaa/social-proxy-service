@@ -144,7 +144,6 @@ public class KafkaTelegramConsumerImpl {
                 case "InlineQueryResultVideo": {
                     InlineQueryResultVideo method = objectMapper.readValue(apiMethod.getData(), InlineQueryResultVideo.class);
                     try {
-                        method.setThumbUrl("https://www.youtube.com/watch?v=PY39bKF7fK4");
                         AnswerInlineQuery answerInlineQuery = new AnswerInlineQuery();
                         answerInlineQuery.setResults(method);
                         answerInlineQuery.setInlineQueryId(method.getId());

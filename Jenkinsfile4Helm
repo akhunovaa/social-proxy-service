@@ -1,12 +1,12 @@
 pipeline {
 
     environment {
-        dockerImageName = "botmasterzzz-socail-proxy-service"
+        dockerImageName = "botmasterzzz-social-proxy-service"
         registryUrl = "https://rusberbank.ru"
         registry = "rusberbank.ru/${dockerImageName}"
         registryCredential = "ourHubPwd"
         remoteHost = "5.189.146.63"
-        helmFilesDirectoryName = "helm/botmasterzzz-socail-proxy-service"
+        helmFilesDirectoryName = "helm/botmasterzzz-social-proxy-service"
         remoteWorkSpace = "/home/jenkins/workspace"
         KUBECONFIG = "/home/jenkins/.kube/config"
         namespace4upgrade = "${env.UPGRADE_NAMESPACE}"
