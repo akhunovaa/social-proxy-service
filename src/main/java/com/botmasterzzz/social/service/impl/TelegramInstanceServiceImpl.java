@@ -85,6 +85,7 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         styleLadyBotInstance.setUserName("Стиль Леди");
         styleLadyBotInstance.setOptions(new DefaultBotOptions());
         styleLadyBotInstance.setSession(styleLadyBotSession);
+        styleLadyBotInstance.setInstanceId(41L);
         styleLadyBotInstance.start();
 
         LOGGER.info("Telegram Style Lady bot after service restart has been started. {}", styleLadyBotToken);
