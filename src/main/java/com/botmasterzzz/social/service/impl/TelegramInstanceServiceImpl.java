@@ -24,6 +24,7 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
     private static BotInstanceContainer botInstanceContainer = BotInstanceContainer.getInstanse();
 
     private TelegramInstanceDAO telegramInstanceDAO;
+
     private ApplicationContext applicationContext;
 
     @Value("${telegram.bot.token}")
@@ -34,6 +35,9 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
 
     @Value("${telegram.style.lady.bot.token}")
     private String styleLadyBotToken;
+
+    @Value("${telegram.search.bot.token}")
+    private String searchBotToken;
 
     @Value("${telegram.chelny.kazan.bot.token}")
     private String taxiToken;
@@ -91,6 +95,20 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         LOGGER.info("Telegram Style Lady bot after service restart has been started. {}", styleLadyBotToken);
         botInstanceContainer.addTelegramBotInstance(41L, styleLadyBotInstance);
         LOGGER.info("Telegram Style Lady bot after service restart has been added. {}", styleLadyBotToken);
+
+        BotSession searchBotSession = new DefaultBotSession();
+        searchBotSession.setToken(searchBotToken);
+        Telegram searchBotInstance = applicationContext.getBean(Telegram.class);
+        searchBotInstance.setToken(searchBotToken);
+        searchBotInstance.setUserName("Стиль Леди");
+        searchBotInstance.setOptions(new DefaultBotOptions());
+        searchBotInstance.setSession(searchBotSession);
+        searchBotInstance.setInstanceId(43L);
+        searchBotInstance.start();
+
+        LOGGER.info("Telegram Search bot has been started. {}", searchBotToken);
+        botInstanceContainer.addTelegramBotInstance(43L, searchBotInstance);
+        LOGGER.info("Telegram Search bot has been added. {}", searchBotToken);
 
         BotSession taxiBotSession = new DefaultBotSession();
         taxiBotSession.setToken(taxiToken);
