@@ -100,7 +100,7 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         searchBotSession.setToken(searchBotToken);
         Telegram searchBotInstance = applicationContext.getBean(Telegram.class);
         searchBotInstance.setToken(searchBotToken);
-        searchBotInstance.setUserName("Стиль Леди");
+        searchBotInstance.setUserName("Search Telegram BOT");
         searchBotInstance.setOptions(new DefaultBotOptions());
         searchBotInstance.setSession(searchBotSession);
         searchBotInstance.setInstanceId(42L);
