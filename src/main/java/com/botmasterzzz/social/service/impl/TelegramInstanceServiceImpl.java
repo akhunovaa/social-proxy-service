@@ -103,7 +103,7 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         searchBotInstance.setUserName("Стиль Леди");
         searchBotInstance.setOptions(new DefaultBotOptions());
         searchBotInstance.setSession(searchBotSession);
-        searchBotInstance.setInstanceId(43L);
+        searchBotInstance.setInstanceId(42L);
         searchBotInstance.start();
 
         LOGGER.info("Telegram Search bot has been started. {}", searchBotToken);
