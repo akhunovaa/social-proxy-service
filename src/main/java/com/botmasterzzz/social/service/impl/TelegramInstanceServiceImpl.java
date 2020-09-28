@@ -107,7 +107,7 @@ public class TelegramInstanceServiceImpl implements TelegramInstanceService {
         searchBotInstance.start();
 
         LOGGER.info("Telegram Search bot has been started. {}", searchBotToken);
-        botInstanceContainer.addTelegramBotInstance(43L, searchBotInstance);
+        botInstanceContainer.addTelegramBotInstance(42L, searchBotInstance);
         LOGGER.info("Telegram Search bot has been added. {}", searchBotToken);
 
         BotSession taxiBotSession = new DefaultBotSession();
