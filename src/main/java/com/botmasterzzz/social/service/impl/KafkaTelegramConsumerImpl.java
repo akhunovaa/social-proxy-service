@@ -141,16 +141,12 @@ public class KafkaTelegramConsumerImpl {
                     }
                     break;
                 }
-                case "InlineQueryResultVideo": {
-                    InlineQueryResultVideo method = objectMapper.readValue(apiMethod.getData(), InlineQueryResultVideo.class);
+                case "AnswerInlineQuery": {
+                    AnswerInlineQuery method = objectMapper.readValue(apiMethod.getData(), AnswerInlineQuery.class);
                     try {
-                        AnswerInlineQuery answerInlineQuery = new AnswerInlineQuery();
-                        answerInlineQuery.setResults(method);
-                        answerInlineQuery.setInlineQueryId(method.getId());
-                        answerInlineQuery.setPersonal(false);
-                        botInstanceContainer.getBotInstance(instanceId).execute(answerInlineQuery);
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
                     } catch (TelegramApiException telegramApiException) {
-                        LOGGER.error("Error to send a DeleteMessage to Telegram", telegramApiException);
+                        LOGGER.error("Error to send a AnswerInlineQuery to Telegram", telegramApiException);
                     }
                     break;
                 }
