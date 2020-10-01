@@ -9,8 +9,8 @@ import com.botmasterzzz.bot.api.impl.methods.update.EditMessageText;
 import com.botmasterzzz.bot.api.impl.objects.InputFile;
 import com.botmasterzzz.bot.api.impl.objects.Message;
 import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
-import com.botmasterzzz.bot.api.impl.objects.inlinequery.result.InlineQueryResultVideo;
 import com.botmasterzzz.bot.exceptions.TelegramApiException;
+import com.botmasterzzz.bot.exceptions.TelegramApiRequestException;
 import com.botmasterzzz.social.config.telegram.BotInstanceContainer;
 import com.botmasterzzz.social.dto.KafkaKeyDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,7 +71,16 @@ public class KafkaTelegramConsumerImpl {
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
                     } catch (TelegramApiException telegramApiException) {
-                        LOGGER.error("Error to send a photo to Telegram", telegramApiException);
+                        LOGGER.error("Error to send a photo to chat id: {} Telegram", chatId, telegramApiException);
+                        String exceptionMessage = telegramApiException.getMessage();
+                        String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
+                        Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
+                        String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                        try {
+                            botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
+                        } catch (TelegramApiException exception) {
+                            LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
+                        }
                     }
                     break;
                 }
@@ -95,7 +104,16 @@ public class KafkaTelegramConsumerImpl {
 //                            kafkaMessageTemplate.send(topicName, fileName, responseMessage);
 //                        }
                     } catch (TelegramApiException telegramApiException) {
-                        LOGGER.error("Error to send a video to Telegram", telegramApiException);
+                        LOGGER.error("Error to send a video to chat id: {} Telegram", chatId, telegramApiException);
+                        String exceptionMessage = telegramApiException.getMessage();
+                        String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
+                        Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
+                        String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                        try {
+                            botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
+                        } catch (TelegramApiException exception) {
+                            LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
+                        }
                     }
                     break;
                 }
@@ -250,6 +268,13 @@ public class KafkaTelegramConsumerImpl {
         mailingData.add(editMessageTextFour);
 
         return mailingData;
+    }
+
+    private SendMessage sendBlockActionToAdmin(String chatId, String cause){
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(105239613L);
+        sendMessage.setText("User " +chatId + " sent exception: \n" + cause);
+        return sendMessage;
     }
 
 }

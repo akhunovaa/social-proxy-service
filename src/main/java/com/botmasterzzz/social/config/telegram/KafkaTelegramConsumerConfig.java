@@ -12,9 +12,14 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.retry.RetryPolicy;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.NeverRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Configuration
 public class KafkaTelegramConsumerConfig {
@@ -32,6 +37,8 @@ public class KafkaTelegramConsumerConfig {
         factory.setConsumerFactory(messageConsumerFactory());
         factory.setBatchListener(false);
         factory.setConcurrency(5);
+        factory.setRetryTemplate(kafkaRetry());
+        factory.setRecoveryCallback(retryContext -> Optional.empty());
         factory.setMessageConverter(new StringJsonMessageConverter());
         return factory;
     }
@@ -51,6 +58,17 @@ public class KafkaTelegramConsumerConfig {
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         return props;
+    }
+
+
+    private RetryTemplate kafkaRetry() {
+        RetryTemplate retryTemplate = new RetryTemplate();
+        FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+        fixedBackOffPolicy.setBackOffPeriod(100 * 10000L);
+        retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
+        RetryPolicy retryPolicy = new NeverRetryPolicy();
+        retryTemplate.setRetryPolicy(retryPolicy);
+        return retryTemplate;
     }
 
 
