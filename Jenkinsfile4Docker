@@ -2,8 +2,8 @@ pipeline {
 
     environment {
         dockerImageName = "botmasterzzz-social-proxy-service"
-        registryUrl = "https://rusberbank.ru"
-        registry = "rusberbank.ru/${dockerImageName}"
+       registryUrl = "https://registry.yourapi.ru"
+        registry = "registry.yourapi.ru/${dockerImageName}"
         registryCredential = "ourHubPwd"
         dockerExternalPort = "0.0.0.0:7100"
         dockerInternalPort = "7104"
