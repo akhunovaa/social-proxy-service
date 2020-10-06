@@ -10,6 +10,7 @@ public class KafkaKeyDTO implements Serializable {
     private Integer updateId;
     private String fileName;
     private boolean loading;
+    private String userName;
 
     public Long getInstanceKey() {
         return instanceKey;
@@ -43,6 +44,14 @@ public class KafkaKeyDTO implements Serializable {
         this.loading = loading;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     @Override
     public String toString() {
         return "KafkaKeyDTO{" +
@@ -50,6 +59,7 @@ public class KafkaKeyDTO implements Serializable {
                 ", updateId=" + updateId +
                 ", fileName='" + fileName + '\'' +
                 ", loading=" + loading +
+                ", userName='" + userName + '\'' +
                 '}';
     }
 
@@ -61,11 +71,12 @@ public class KafkaKeyDTO implements Serializable {
         return loading == that.loading &&
                 Objects.equal(instanceKey, that.instanceKey) &&
                 Objects.equal(updateId, that.updateId) &&
-                Objects.equal(fileName, that.fileName);
+                Objects.equal(fileName, that.fileName) &&
+                Objects.equal(userName, that.userName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(instanceKey, updateId, fileName, loading);
+        return Objects.hashCode(instanceKey, updateId, fileName, loading, userName);
     }
 }

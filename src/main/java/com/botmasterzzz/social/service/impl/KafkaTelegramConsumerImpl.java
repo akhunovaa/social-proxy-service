@@ -2,6 +2,7 @@ package com.botmasterzzz.social.service.impl;
 
 import com.botmasterzzz.bot.api.impl.methods.ActionType;
 import com.botmasterzzz.bot.api.impl.methods.AnswerInlineQuery;
+import com.botmasterzzz.bot.api.impl.methods.ParseMode;
 import com.botmasterzzz.bot.api.impl.methods.send.*;
 import com.botmasterzzz.bot.api.impl.methods.update.DeleteMessage;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageReplyMarkup;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -36,6 +38,8 @@ public class KafkaTelegramConsumerImpl {
     private final ObjectMapper objectMapper;
 
     private final KafkaTemplate<String, Message> kafkaMessageTemplate;
+
+    private static List<String> chatList = Collections.synchronizedList(new ArrayList<>());
 
     @Value(value = "${telegram.message.callback.topic.name}")
     private String topicName;
@@ -168,6 +172,31 @@ public class KafkaTelegramConsumerImpl {
                     }
                     break;
                 }
+                case "MailingMessage": {
+                    SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    String chatId = method.getChatId();
+                    boolean chatContains = chatList.contains(chatId);
+                    if (chatContains){
+                        LOGGER.info("Already sent to this chat id {}", chatId);
+                    }else {
+                        try {
+                            botInstanceContainer.getBotInstance(instanceId).execute(method);
+                            chatList.add(chatId);
+                        } catch (TelegramApiException telegramApiException) {
+                            LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
+                            String exceptionMessage = telegramApiException.getMessage();
+                            String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
+                            Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
+                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                            try {
+                                botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
+                            } catch (TelegramApiException exception) {
+                                LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
+                            }
+                        }
+                    }
+                    break;
+                }
                 default: {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
                     boolean loading = kafkaKeyDTO.isLoading();
@@ -273,7 +302,9 @@ public class KafkaTelegramConsumerImpl {
     private SendMessage sendBlockActionToAdmin(String chatId, String cause){
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(105239613L);
-        sendMessage.setText("User " +chatId + " sent exception: \n" + cause);
+        String userLink = "<a href=\"tg://user?id=" + chatId + "\">" + "USER" + "</a>";
+        sendMessage.setText("User =>" + userLink + " chat id =>" + chatId + "\nSent to " + chatList.size() + "  persons. " + "And this one sent an exception: \n" + cause);
+        sendMessage.setParseMode(ParseMode.HTML);
         return sendMessage;
     }
 
