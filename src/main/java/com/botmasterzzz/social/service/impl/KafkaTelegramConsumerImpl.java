@@ -173,14 +173,14 @@ public class KafkaTelegramConsumerImpl {
                     break;
                 }
                 case "MailingMessage": {
-                    SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    SendPhoto method = objectMapper.readValue(apiMethod.getData(), SendPhoto.class);
                     String chatId = method.getChatId();
                     boolean chatContains = chatList.contains(chatId);
                     if (chatContains){
                         LOGGER.info("Already sent to this chat id {}", chatId);
                     }else {
                         try {
-                            botInstanceContainer.getBotInstance(instanceId).execute(method);
+                            botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
                             chatList.add(chatId);
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
