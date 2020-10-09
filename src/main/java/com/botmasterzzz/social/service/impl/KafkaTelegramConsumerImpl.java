@@ -100,7 +100,7 @@ public class KafkaTelegramConsumerImpl {
                         File uploadVideoFile = new File(fileName);
                         if (uploadVideoFile.exists()) {
                             method.setVideoInputFile(new InputFile(uploadVideoFile, "upload_file"));
-                            LOGGER.info("File from local send {}", uploadVideoFile);
+                            LOGGER.info("File from local send {}", uploadVideoFile.getAbsolutePath());
                         }
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
@@ -125,9 +125,17 @@ public class KafkaTelegramConsumerImpl {
                     SendDocument method = objectMapper.readValue(apiMethod.getData(), SendDocument.class);
                     String chatId = method.getChatId();
                     SendChatAction sendChatAction = new SendChatAction();
-                    sendChatAction.setAction(ActionType.UPLOADVIDEO);
                     sendChatAction.setChatId(chatId);
                     try {
+                        String fileName = method.getDocument().getAttachName();
+                        File uploadDocument = new File(fileName);
+                        if (uploadDocument.exists()) {
+                            sendChatAction.setAction(ActionType.UPLOADDOCUMENT);
+                            method.setDocumentInput(new InputFile(uploadDocument, "report_file_" + method.getChatId() + ".pdf"));
+                            LOGGER.info("File from local send {}", uploadDocument.getAbsolutePath());
+                        }else {
+                            sendChatAction.setAction(ActionType.UPLOADVIDEO);
+                        }
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeDocument(method);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
