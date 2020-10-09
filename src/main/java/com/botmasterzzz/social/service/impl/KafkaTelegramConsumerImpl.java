@@ -131,7 +131,7 @@ public class KafkaTelegramConsumerImpl {
                         File uploadDocument = new File(fileName);
                         if (uploadDocument.exists()) {
                             sendChatAction.setAction(ActionType.UPLOADDOCUMENT);
-                            method.setDocumentInput(new InputFile(uploadDocument, "report_file_" + method.getChatId() + ".pdf"));
+                            method.setDocumentInput(new InputFile(uploadDocument, "report_file_" + method.getChatId() + ".xlsx"));
                             LOGGER.info("File from local send {}", uploadDocument.getAbsolutePath());
                         }else {
                             sendChatAction.setAction(ActionType.UPLOADVIDEO);
