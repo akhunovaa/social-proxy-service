@@ -232,7 +232,7 @@ public class KafkaTelegramConsumerImpl {
                 }
                 default: {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
-                    boolean loading = kafkaKeyDTO.isLoading();
+                    //boolean loading = kafkaKeyDTO.isLoading();
                     String chatId = method.getChatId();
                     SendChatAction sendChatAction = new SendChatAction();
                     sendChatAction.setAction(ActionType.TYPING);
@@ -240,28 +240,28 @@ public class KafkaTelegramConsumerImpl {
                     try {
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
-                        if (loading) {
-                            Integer messageId = responseMessage.getMessageId();
-                            for (int i = 0; i < 2; i++) {
-                                for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
-                                    botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
-                                    try {
-                                        Thread.sleep(500L);
-                                    } catch (InterruptedException exception) {
-                                        LOGGER.error("Loading thread sleep exception", exception);
-                                    }
-                                }
-                            }
-                            DeleteMessage deleteMethod = new DeleteMessage();
-                            deleteMethod.setMessageId(messageId);
-                            deleteMethod.setChatId(chatId);
-                            try {
-                                botInstanceContainer.getBotInstance(instanceId).execute(deleteMethod);
-                            } catch (TelegramApiException telegramApiException) {
-                                LOGGER.error("Error to send a loading DeleteMessage to Telegram", telegramApiException);
-                            }
-
-                        }
+//                        if (loading) {
+//                            Integer messageId = responseMessage.getMessageId();
+//                            for (int i = 0; i < 2; i++) {
+//                                for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
+//                                    botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
+//                                    try {
+//                                        Thread.sleep(500L);
+//                                    } catch (InterruptedException exception) {
+//                                        LOGGER.error("Loading thread sleep exception", exception);
+//                                    }
+//                                }
+//                            }
+//                            DeleteMessage deleteMethod = new DeleteMessage();
+//                            deleteMethod.setMessageId(messageId);
+//                            deleteMethod.setChatId(chatId);
+//                            try {
+//                                botInstanceContainer.getBotInstance(instanceId).execute(deleteMethod);
+//                            } catch (TelegramApiException telegramApiException) {
+//                                LOGGER.error("Error to send a loading DeleteMessage to Telegram", telegramApiException);
+//                            }
+//
+//                        }
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a SendMessage to Telegram", telegramApiException);
