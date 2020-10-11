@@ -1,10 +1,10 @@
 package com.botmasterzzz.social.config.telegram;
 
 import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
-import com.botmasterzzz.social.deserializer.KafkaKeyDeserializer;
-import com.botmasterzzz.social.dto.KafkaKeyDTO;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.BytesDeserializer;
+import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,8 +31,8 @@ public class KafkaTelegramConsumerConfig {
     private String groupId;
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<KafkaKeyDTO, OutgoingMessage> singleFactory() {
-        ConcurrentKafkaListenerContainerFactory<KafkaKeyDTO, OutgoingMessage> factory =
+    public ConcurrentKafkaListenerContainerFactory<Long, OutgoingMessage> singleFactory() {
+        ConcurrentKafkaListenerContainerFactory<Long, OutgoingMessage> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(messageConsumerFactory());
         factory.setBatchListener(false);
@@ -44,7 +44,7 @@ public class KafkaTelegramConsumerConfig {
     }
 
     @Bean
-    public ConsumerFactory<KafkaKeyDTO, OutgoingMessage> messageConsumerFactory() {
+    public ConsumerFactory<Long, OutgoingMessage> messageConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
 
@@ -53,7 +53,7 @@ public class KafkaTelegramConsumerConfig {
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, KafkaKeyDeserializer.class);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, BytesDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);

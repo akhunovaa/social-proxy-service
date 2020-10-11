@@ -52,7 +52,7 @@ public class KafkaTelegramConsumerImpl {
     }
 
     @KafkaListener(id = "telegram-message-service", topics = {"telegram-outcome-messages"}, containerFactory = "singleFactory")
-    public void consumeMessage(@Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) KafkaKeyDTO kafkaKeyDTO, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, OutgoingMessage apiMethod) {
+    public void consumeMessage(@Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) Long kafkaKey, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, OutgoingMessage apiMethod) {
         String logValue = null;
         try {
             logValue = writeValueAsString(apiMethod);
@@ -61,7 +61,7 @@ public class KafkaTelegramConsumerImpl {
         }
         LOGGER.info("=> consumed {}", logValue);
         String type = apiMethod.getTypeMessage();
-        Long instanceId = kafkaKeyDTO.getInstanceKey();
+        Long instanceId = kafkaKey;
         try {
             switch (type) {
                 case "SendPhoto": {
