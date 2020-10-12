@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@RestController("/video")
+@RestController
 public class ResourceController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
@@ -25,7 +25,7 @@ public class ResourceController extends AbstractController {
     @Value("${video.file.upload.path}")
     private String videoPath;
 
-    @RequestMapping(value = "/{videoId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/video/{videoId}", method = RequestMethod.GET)
     public ResponseEntity<byte[]> mediaGet(@PathVariable String videoId) {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<byte[]> responseEntity;
@@ -47,7 +47,7 @@ public class ResourceController extends AbstractController {
         return responseEntity;
     }
 
-    @RequestMapping(value = "/cover/{coverId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/video/cover/{coverId}", method = RequestMethod.GET)
     public ResponseEntity<byte[]> coverGet(@PathVariable String coverId) {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<byte[]> responseEntity;
