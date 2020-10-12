@@ -38,9 +38,9 @@ public class Telegram extends TelegramLongPollingBot {
     public void onUpdateReceived(final Update update) {
         LOGGER.info("Update received for an instance: {} update: {}", this.instanceId, update.toString());
         LOGGER.info("<= sending {}", update.toString());
-        KafkaKeyDTO kafkaKeyDTO = new KafkaKeyDTO();
-        kafkaKeyDTO.setInstanceKey(this.instanceId);
-        kafkaKeyDTO.setUpdateId(update.getUpdateId());
+//        KafkaKeyDTO kafkaKeyDTO = new KafkaKeyDTO();
+//        kafkaKeyDTO.setInstanceKey(this.instanceId);
+//        kafkaKeyDTO.setUpdateId(update.getUpdateId());
         //kafkaTemplate.send(topicName, kafkaKeyDTO, update);
         kafkaTemplate.send(topicName, this.instanceId, update);
     }
