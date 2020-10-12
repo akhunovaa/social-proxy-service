@@ -51,7 +51,7 @@ public class KafkaTelegramConsumerImpl {
         this.kafkaMessageTemplate = kafkaMessageTemplate;
     }
 
-    @KafkaListener(id = "telegram-message-service", topics = {"telegram-outcome-messages"}, containerFactory = "singleFactory")
+    @KafkaListener(id = "telegram-message-service", topics = {"tg-outcome-message"}, containerFactory = "singleFactory")
     public void consumeMessage(@Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) Long kafkaKey, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic, OutgoingMessage apiMethod) {
         String logValue = null;
         try {
