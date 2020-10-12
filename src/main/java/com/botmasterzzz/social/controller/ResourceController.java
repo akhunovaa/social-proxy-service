@@ -53,7 +53,7 @@ public class ResourceController extends AbstractController {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<byte[]> responseEntity;
 
-        String fullPath = videoPath + "/" + "cover" + "/" + coverId + ".jpg";
+        String fullPath = videoPath + "/" + "cover" + "/" + coverId + ".jpeg";
         LOGGER.info("User path location directory {}", fullPath);
         File coverFile = new File(fullPath);
         LOGGER.info("User file {} in directory {}", coverFile.getName(), fullPath);
