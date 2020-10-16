@@ -13,13 +13,11 @@ import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
 import com.botmasterzzz.bot.exceptions.TelegramApiException;
 import com.botmasterzzz.bot.exceptions.TelegramApiRequestException;
 import com.botmasterzzz.social.config.telegram.BotInstanceContainer;
-import com.botmasterzzz.social.dto.KafkaKeyDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
@@ -27,28 +25,19 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class KafkaTelegramConsumerImpl {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaTelegramConsumerImpl.class);
-
+    private static final BotInstanceContainer botInstanceContainer = BotInstanceContainer.getInstanse();
+    private static List<String> chatList = new CopyOnWriteArrayList();
     private final ObjectMapper objectMapper;
 
-    private final KafkaTemplate<String, Message> kafkaMessageTemplate;
-
-    private static List<String> chatList = Collections.synchronizedList(new ArrayList<>());
-
-    @Value(value = "${telegram.message.callback.topic.name}")
-    private String topicName;
-
-    private static final BotInstanceContainer botInstanceContainer = BotInstanceContainer.getInstanse();
-
-    public KafkaTelegramConsumerImpl(ObjectMapper objectMapper, KafkaTemplate<String, Message> kafkaMessageTemplate) {
+    public KafkaTelegramConsumerImpl(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.kafkaMessageTemplate = kafkaMessageTemplate;
     }
 
     @KafkaListener(id = "telegram-message-service", topics = {"tg-outcome-message"}, containerFactory = "singleFactory")
@@ -133,7 +122,7 @@ public class KafkaTelegramConsumerImpl {
                             sendChatAction.setAction(ActionType.UPLOADDOCUMENT);
                             method.setDocumentInput(new InputFile(uploadDocument, "report_file_" + method.getChatId() + ".xlsx"));
                             LOGGER.info("File from local send {}", uploadDocument.getAbsolutePath());
-                        }else {
+                        } else {
                             sendChatAction.setAction(ActionType.UPLOADVIDEO);
                         }
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
@@ -184,9 +173,9 @@ public class KafkaTelegramConsumerImpl {
                     SendPhoto method = objectMapper.readValue(apiMethod.getData(), SendPhoto.class);
                     String chatId = method.getChatId();
                     boolean chatContains = chatList.contains(chatId);
-                    if (chatContains){
+                    if (chatContains) {
                         LOGGER.info("Already sent to this chat id {}", chatId);
-                    }else {
+                    } else {
                         try {
                             botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
                             chatList.add(chatId);
@@ -209,9 +198,9 @@ public class KafkaTelegramConsumerImpl {
                     SendVideo method = objectMapper.readValue(apiMethod.getData(), SendVideo.class);
                     String chatId = method.getChatId();
                     boolean chatContains = chatList.contains(chatId);
-                    if (chatContains){
+                    if (chatContains) {
                         LOGGER.info("Already sent to this chat id {}", chatId);
-                    }else {
+                    } else {
                         try {
                             botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                             chatList.add(chatId);
@@ -240,28 +229,6 @@ public class KafkaTelegramConsumerImpl {
                     try {
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
-//                        if (loading) {
-//                            Integer messageId = responseMessage.getMessageId();
-//                            for (int i = 0; i < 2; i++) {
-//                                for (EditMessageText editMessageText : loadingAnimation(chatId, messageId)) {
-//                                    botInstanceContainer.getBotInstance(instanceId).execute(editMessageText);
-//                                    try {
-//                                        Thread.sleep(500L);
-//                                    } catch (InterruptedException exception) {
-//                                        LOGGER.error("Loading thread sleep exception", exception);
-//                                    }
-//                                }
-//                            }
-//                            DeleteMessage deleteMethod = new DeleteMessage();
-//                            deleteMethod.setMessageId(messageId);
-//                            deleteMethod.setChatId(chatId);
-//                            try {
-//                                botInstanceContainer.getBotInstance(instanceId).execute(deleteMethod);
-//                            } catch (TelegramApiException telegramApiException) {
-//                                LOGGER.error("Error to send a loading DeleteMessage to Telegram", telegramApiException);
-//                            }
-//
-//                        }
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a SendMessage to Telegram", telegramApiException);
@@ -332,7 +299,7 @@ public class KafkaTelegramConsumerImpl {
         return mailingData;
     }
 
-    private SendMessage sendBlockActionToAdmin(String chatId, String cause){
+    private SendMessage sendBlockActionToAdmin(String chatId, String cause) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(105239613L);
         String userLink = "<a href=\"tg://user?id=" + chatId + "\">" + "USER" + "</a>";
