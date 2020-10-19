@@ -8,7 +8,6 @@ import com.botmasterzzz.bot.api.impl.methods.update.DeleteMessage;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageReplyMarkup;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageText;
 import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
-import com.botmasterzzz.social.config.telegram.BotInstanceContainer;
 import com.botmasterzzz.social.service.MessageProcess;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class KafkaTelegramConsumerImpl {
