@@ -195,8 +195,8 @@ public class TelegramMessageProcessor implements MessageProcess {
                         LOGGER.info("Already sent to this chat id {}", chatId);
                     } else {
                         try {
-                            botInstanceContainer.getBotInstance(instanceId).execute(method);
                             chatList.add(chatId);
+                            botInstanceContainer.getBotInstance(instanceId).execute(method);
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                             String exceptionMessage = telegramApiException.getMessage();
