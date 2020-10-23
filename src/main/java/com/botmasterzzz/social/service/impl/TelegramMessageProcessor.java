@@ -17,6 +17,8 @@ import com.botmasterzzz.social.service.MessageProcess;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +36,14 @@ public class TelegramMessageProcessor implements MessageProcess {
     private static final List<String> chatList = new CopyOnWriteArrayList();
     private final ObjectMapper objectMapper;
 
-    public TelegramMessageProcessor(ObjectMapper objectMapper) {
+    @Value(value = "${telegram.response.messages.topic.name}")
+    private String topicName;
+
+    private final KafkaTemplate<Long, Message> kafkaMessageTemplate;
+
+    public TelegramMessageProcessor(ObjectMapper objectMapper, KafkaTemplate<Long, Message> kafkaMessageTemplate) {
         this.objectMapper = objectMapper;
+        this.kafkaMessageTemplate = kafkaMessageTemplate;
     }
 
     @Async
@@ -56,6 +64,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
+                        process(responseMessage, kafkaKey);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a photo to chat id: {} Telegram", chatId, telegramApiException);
                         String exceptionMessage = telegramApiException.getMessage();
@@ -86,6 +95,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         }
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
+                        process(responseMessage, kafkaKey);
 //                        if (uploadVideoFile.exists()) {
 //                            kafkaMessageTemplate.send(topicName, fileName, responseMessage);
 //                        }
@@ -120,6 +130,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         }
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeDocument(method);
+                        process(responseMessage, kafkaKey);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a Document to Telegram", telegramApiException);
@@ -141,6 +152,16 @@ public class TelegramMessageProcessor implements MessageProcess {
                         botInstanceContainer.getBotInstance(instanceId).execute(method);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a EditMessageReplyMarkup to Telegram", telegramApiException);
+                        String chatId = method.getChatId();
+                        String exceptionMessage = telegramApiException.getMessage();
+                        String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
+                        Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
+                        String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                        try {
+                            botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
+                        } catch (TelegramApiException exception) {
+                            LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
+                        }
                     }
                     break;
                 }
@@ -170,7 +191,8 @@ public class TelegramMessageProcessor implements MessageProcess {
                         LOGGER.info("Already sent to this chat id {}", chatId);
                     } else {
                         try {
-                            botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
+                            Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executePhoto(method);
+                            process(responseMessage, kafkaKey);
                             chatList.add(chatId);
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
@@ -196,7 +218,8 @@ public class TelegramMessageProcessor implements MessageProcess {
                     } else {
                         try {
                             chatList.add(chatId);
-                            botInstanceContainer.getBotInstance(instanceId).execute(method);
+                            Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
+                            process(responseMessage, kafkaKey);
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                             String exceptionMessage = telegramApiException.getMessage();
@@ -220,8 +243,9 @@ public class TelegramMessageProcessor implements MessageProcess {
                         LOGGER.info("Already sent to this chat id {}", chatId);
                     } else {
                         try {
-                            botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                             chatList.add(chatId);
+                            Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
+                            process(responseMessage, kafkaKey);
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                             String exceptionMessage = telegramApiException.getMessage();
@@ -257,6 +281,14 @@ public class TelegramMessageProcessor implements MessageProcess {
         } catch (IOException ex) {
             LOGGER.error("ERROR IOException", ex);
         }
+    }
+
+    @Override
+    public void process(Message message, Long kafkaKey) {
+        Long instanceId = kafkaKey;
+        LOGGER.info("Message response for an instance: {} message: {}", instanceId, message.toString());
+        LOGGER.info("<= sending {}", message.toString());
+        kafkaMessageTemplate.send(topicName, instanceId, message);
     }
 
     private SendMessage sendBlockActionToAdmin(String chatId, String cause) {

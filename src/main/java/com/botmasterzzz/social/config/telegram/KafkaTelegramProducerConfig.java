@@ -4,7 +4,6 @@ import com.botmasterzzz.bot.api.impl.objects.Message;
 import com.botmasterzzz.bot.api.impl.objects.Update;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongSerializer;
-import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,18 +32,8 @@ public class KafkaTelegramProducerConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
-        props.put(ProducerConfig.ACKS_CONFIG, "0");
+        //props.put(ProducerConfig.ACKS_CONFIG, "0");
         //props.put(ProducerConfig.RETRIES_CONFIG, 1);
-        return props;
-    }
-
-    @Bean
-    public Map<String, Object> messageProducerConfigs() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         return props;
     }
 
@@ -54,8 +43,8 @@ public class KafkaTelegramProducerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Message> producerMessageFactory() {
-        return new DefaultKafkaProducerFactory<>(messageProducerConfigs());
+    public ProducerFactory<Long, Message> responseMessageProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
@@ -66,8 +55,8 @@ public class KafkaTelegramProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, Message> kafkaMessageTemplate() {
-        KafkaTemplate<String, Message> template = new KafkaTemplate<>(producerMessageFactory());
+    public KafkaTemplate<Long, Message> kafkaMessageTemplate() {
+        KafkaTemplate<Long, Message> template = new KafkaTemplate<>(responseMessageProducerFactory());
         template.setMessageConverter(new StringJsonMessageConverter());
         return template;
     }

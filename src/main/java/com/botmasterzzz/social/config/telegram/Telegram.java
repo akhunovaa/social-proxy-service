@@ -4,7 +4,6 @@ import com.botmasterzzz.bot.TelegramLongPollingBot;
 import com.botmasterzzz.bot.api.impl.objects.Update;
 import com.botmasterzzz.bot.bot.DefaultBotOptions;
 import com.botmasterzzz.bot.generic.BotSession;
-import com.botmasterzzz.social.dto.KafkaKeyDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
