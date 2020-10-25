@@ -159,8 +159,26 @@ public class TelegramMessageProcessor implements MessageProcess {
                         String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
                         try {
                             botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
-                        } catch (TelegramApiException exception) {
+                            if (errorCode == 429){
+                                Thread.sleep(7000L);
+                                botInstanceContainer.getBotInstance(instanceId).execute(method);
+                            }
+                        } catch (TelegramApiException | InterruptedException exception) {
                             LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
+                            chatId = method.getChatId();
+                            exceptionMessage = telegramApiException.getMessage();
+                            apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
+                            errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
+                            exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                            try {
+                                botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
+                                if (errorCode == 429){
+                                    Thread.sleep(7000L);
+                                    botInstanceContainer.getBotInstance(instanceId).execute(method);
+                                }
+                            } catch (TelegramApiException | InterruptedException e) {
+                                LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
+                            }
                         }
                     }
                     break;
