@@ -279,6 +279,32 @@ public class TelegramMessageProcessor implements MessageProcess {
                     }
                     break;
                 }
+                case "MailingMessageDocument": {
+                    SendDocument method = objectMapper.readValue(apiMethod.getData(), SendDocument.class);
+                    String chatId = method.getChatId();
+                    boolean chatContains = chatList.contains(chatId);
+                    if (chatContains) {
+                        LOGGER.info("Already sent to this chat id {}", chatId);
+                    } else {
+                        try {
+                            chatList.add(chatId);
+                            Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeDocument(method);
+                            process(responseMessage, kafkaKey);
+                        } catch (TelegramApiException telegramApiException) {
+                            LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
+                            String exceptionMessage = telegramApiException.getMessage();
+                            String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
+                            Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
+                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                            try {
+                                botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
+                            } catch (TelegramApiException exception) {
+                                LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
+                            }
+                        }
+                    }
+                    break;
+                }
                 default: {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
                     //boolean loading = kafkaKeyDTO.isLoading();
