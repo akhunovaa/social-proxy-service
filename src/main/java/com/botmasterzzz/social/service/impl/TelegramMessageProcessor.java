@@ -338,6 +338,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                     int size = chatList.size();
                     chatList.clear();
                     try {
+                        Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
                         botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, "Was: " + size + " \n Done!"));
                     } catch (TelegramApiException exception) {
                         LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
