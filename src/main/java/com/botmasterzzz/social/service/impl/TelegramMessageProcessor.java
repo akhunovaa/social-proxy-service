@@ -215,9 +215,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                             String exceptionMessage = telegramApiException.getMessage();
-                            String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
-                            Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
-                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage;
                             try {
                                 botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
                             } catch (TelegramApiException exception) {
@@ -241,9 +239,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                             String exceptionMessage = telegramApiException.getMessage();
-                            String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
-                            Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
-                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage;
                             try {
                                 botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
                             } catch (TelegramApiException exception) {
@@ -267,10 +263,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                             String exceptionMessage = telegramApiException.getMessage();
-                            String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
-                            Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
-                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
-                            try {
+                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage;  try {
                                 botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
                             } catch (TelegramApiException exception) {
                                 LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
@@ -293,9 +286,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         } catch (TelegramApiException telegramApiException) {
                             LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                             String exceptionMessage = telegramApiException.getMessage();
-                            String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
-                            Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
-                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage;
                             try {
                                 botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
                             } catch (TelegramApiException exception) {
