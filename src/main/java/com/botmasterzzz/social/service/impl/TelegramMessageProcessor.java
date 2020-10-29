@@ -338,8 +338,10 @@ public class TelegramMessageProcessor implements MessageProcess {
                     int size = chatList.size();
                     chatList.clear();
                     try {
+                        String message = "Was: " + size + " \n Done!" + " \n" + method.getText();
+                        method.setText(message);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
-                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, "Was: " + size + " \n Done!"));
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, message));
                     } catch (TelegramApiException exception) {
                         LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
                     }
@@ -379,7 +381,7 @@ public class TelegramMessageProcessor implements MessageProcess {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(105239613L);
         String userLink = "<a href=\"tg://user?id=" + chatId + "\">" + "USER" + "</a>";
-        sendMessage.setText("User =>" + userLink + " \nChat id =>" + chatId + "\nSent to " + chatList.size() + "  persons. \n" + "And this one sent an exception: \n" + cause);
+        sendMessage.setText("User =>" + userLink + " \nChat id =>" + chatId + "\nSent to " + chatList.size() + "  persons.\n" + "And this one sent an exception:\n" + cause);
         sendMessage.setParseMode(ParseMode.HTML);
         return sendMessage;
     }
