@@ -305,6 +305,54 @@ public class TelegramMessageProcessor implements MessageProcess {
                     }
                     break;
                 }
+                case "MailingResetVideo": {
+                    SendVideo method = objectMapper.readValue(apiMethod.getData(), SendVideo.class);
+                    String chatId = method.getChatId();
+                    int size = chatList.size();
+                    chatList.clear();
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, "Was: " + size + " \n Done!"));
+                    } catch (TelegramApiException exception) {
+                        LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
+                    }
+                    break;
+                }
+                case "MailingResetDocument": {
+                    SendDocument method = objectMapper.readValue(apiMethod.getData(), SendDocument.class);
+                    String chatId = method.getChatId();
+                    int size = chatList.size();
+                    chatList.clear();
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, "Was: " + size + " \n Done!"));
+                    } catch (TelegramApiException exception) {
+                        LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
+                    }
+                    break;
+                }
+                case "MailingResetPhoto": {
+                    SendPhoto method = objectMapper.readValue(apiMethod.getData(), SendPhoto.class);
+                    String chatId = method.getChatId();
+                    int size = chatList.size();
+                    chatList.clear();
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, "Was: " + size + " \n Done!"));
+                    } catch (TelegramApiException exception) {
+                        LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
+                    }
+                    break;
+                }
+                case "MailingResetMessage": {
+                    SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    String chatId = method.getChatId();
+                    int size = chatList.size();
+                    chatList.clear();
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, "Was: " + size + " \n Done!"));
+                    } catch (TelegramApiException exception) {
+                        LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
+                    }
+                    break;
+                }
                 default: {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
                     //boolean loading = kafkaKeyDTO.isLoading();
