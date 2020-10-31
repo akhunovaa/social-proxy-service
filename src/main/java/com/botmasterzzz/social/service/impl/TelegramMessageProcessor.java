@@ -1,6 +1,7 @@
 package com.botmasterzzz.social.service.impl;
 
 import com.botmasterzzz.bot.api.impl.methods.ActionType;
+import com.botmasterzzz.bot.api.impl.methods.AnswerCallbackQuery;
 import com.botmasterzzz.bot.api.impl.methods.AnswerInlineQuery;
 import com.botmasterzzz.bot.api.impl.methods.ParseMode;
 import com.botmasterzzz.bot.api.impl.methods.send.*;
@@ -198,6 +199,15 @@ public class TelegramMessageProcessor implements MessageProcess {
                         botInstanceContainer.getBotInstance(instanceId).execute(method);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a AnswerInlineQuery to Telegram", telegramApiException);
+                    }
+                    break;
+                }
+                case "AnswerCallbackQuery": {
+                    AnswerCallbackQuery method = objectMapper.readValue(apiMethod.getData(), AnswerCallbackQuery.class);
+                    try {
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a AnswerCallbackQuery to Telegram", telegramApiException);
                     }
                     break;
                 }
