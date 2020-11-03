@@ -152,8 +152,9 @@ public class TelegramMessageProcessor implements MessageProcess {
                 case "EditMessageReplyMarkup": {
                     EditMessageReplyMarkup method = objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class);
                     try {
-                        Message responseMessage = (Message) botInstanceContainer.getBotInstance(instanceId).execute(method);
-                        process(responseMessage, kafkaKey);
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        //Message responseMessage = (Message) botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        //process(responseMessage, kafkaKey);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a EditMessageReplyMarkup to Telegram", telegramApiException);
                         String chatId = method.getChatId();
@@ -235,6 +236,23 @@ public class TelegramMessageProcessor implements MessageProcess {
 //                            } catch (TelegramApiException exception) {
 //                                LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
 //                            }
+                        }
+                    }
+                    break;
+                }
+                case "EditMessageReplyMarkupMailing": {
+                    EditMessageReplyMarkup method = objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class);
+                    String chatId = method.getChatId();
+                    boolean chatContains = chatList.contains(chatId);
+                    if (chatContains) {
+                        LOGGER.info("Already edited this chat id {}", chatId);
+                    } else {
+                        try {
+                            chatList.add(chatId);
+                            botInstanceContainer.getBotInstance(instanceId).execute(method);
+                            validChatList.add(chatId);
+                        } catch (TelegramApiException telegramApiException) {
+                            LOGGER.error("Error to send a MailingMessage EditMessageReplyMarkup to Telegram", telegramApiException);
                         }
                     }
                     break;
