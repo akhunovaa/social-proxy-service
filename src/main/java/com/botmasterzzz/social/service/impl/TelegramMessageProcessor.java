@@ -142,7 +142,8 @@ public class TelegramMessageProcessor implements MessageProcess {
                 case "EditMessageText": {
                     EditMessageText method = objectMapper.readValue(apiMethod.getData(), EditMessageText.class);
                     try {
-                        botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        Message responseMessage = (Message) botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        process(responseMessage, kafkaKey);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a EditMessageText to Telegram", telegramApiException);
                     }
@@ -151,7 +152,8 @@ public class TelegramMessageProcessor implements MessageProcess {
                 case "EditMessageReplyMarkup": {
                     EditMessageReplyMarkup method = objectMapper.readValue(apiMethod.getData(), EditMessageReplyMarkup.class);
                     try {
-                        botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        Message responseMessage = (Message) botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        process(responseMessage, kafkaKey);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a EditMessageReplyMarkup to Telegram", telegramApiException);
                         String chatId = method.getChatId();
@@ -395,6 +397,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                     try {
                         botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                         Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        process(responseMessage, kafkaKey);
                         LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a SendMessage to Telegram", telegramApiException);
