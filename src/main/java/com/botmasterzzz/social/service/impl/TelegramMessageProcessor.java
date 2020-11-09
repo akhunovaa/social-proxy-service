@@ -425,7 +425,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                     int validSize = validChatList.size();
                     int fullMailData = null == method.getReplyToMessageId() ? 1 : method.getReplyToMessageId();
                     method.setReplyToMessageId(null);
-                    int percentage = (size * 100 / fullMailData);
+                    int percentage = null == method.getReplyToMessageId() ? 0 : (size * 100 / fullMailData);
                     StringBuilder stringBuilder = new StringBuilder();
                     if (percentage == 0) {
                         stringBuilder.append("⚠️Ожидаются обработаные данные для отправки рассылки на сервера <b>Telegram</b>️\n");
