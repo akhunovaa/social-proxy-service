@@ -449,7 +449,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                     } else {
                         stringBuilder.append("⚠️Идёт отправка обработанной рассылки на сервера <b>Telegram</b>");
                     }
-                    stringBuilder.append("\n").append("      ").append(percentage).append("%\n");
+                    stringBuilder.append("\n").append("      ").append(percentage).append("% \uD83D\uDEA7\n");
                     stringBuilder.append("[");
                     for (int i = 0; i < percentage; i++) {
                         stringBuilder.append("|");
