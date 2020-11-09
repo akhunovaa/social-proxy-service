@@ -421,9 +421,29 @@ public class TelegramMessageProcessor implements MessageProcess {
                     String chatId = method.getChatId();
                     int size = chatList.size();
                     int validSize = validChatList.size();
+                    int fullMailData = method.getReplyToMessageId();
+                    method.setReplyToMessageId(null);
+                    int percentage = (size * 100/ fullMailData);
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (percentage == 0){
+                        stringBuilder.append("⚠️Ожидаются обработанне данные для отправки рассылки на сервера <b>Telegram</b>⚠️\n");
+                    }else if (percentage == 100){
+                        stringBuilder.append("✅Рассылка успешно обработана\n");
+                    }else {
+                        stringBuilder.append("⚠️Идёт отправка обработанной рассылки на сервера <b>Telegram</b>⚠️\n");
+                    }
+                    stringBuilder.append("      ").append(percentage).append("%\n");
+                    stringBuilder.append("[");
+                    for (int i = 0; i < percentage; i++) {
+                        stringBuilder.append("|");
+                    }
+                    for (int i = 0; i < 100 - (percentage); i++) {
+                        stringBuilder.append(" ");
+                    }
+                    stringBuilder.append("]");
                     try {
-                        String message = "Cчётчик по кол-ву отправленных сообщений: " + size + "\nИз успешно доставлено адресатам: " + validSize + "\n";
-                        method.setText(message);
+                        String message = "Cчётчик по кол-ву отправленных сообщений: " + size + "\nИз успешно доставлено адресатам: " + validSize + "\n\n";
+                        method.setText(message + stringBuilder.toString());
                         botInstanceContainer.getBotInstance(instanceId).execute(method);
                         botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, message));
                     } catch (TelegramApiException exception) {
