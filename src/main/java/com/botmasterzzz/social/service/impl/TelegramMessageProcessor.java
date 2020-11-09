@@ -421,15 +421,15 @@ public class TelegramMessageProcessor implements MessageProcess {
                     String chatId = method.getChatId();
                     int size = chatList.size();
                     int validSize = validChatList.size();
-                    int fullMailData = method.getReplyToMessageId();
+                    int fullMailData = null == method.getReplyToMessageId() ? 1 : method.getReplyToMessageId();
                     method.setReplyToMessageId(null);
-                    int percentage = (size * 100/ fullMailData);
+                    int percentage = (size * 100 / fullMailData);
                     StringBuilder stringBuilder = new StringBuilder();
-                    if (percentage == 0){
+                    if (percentage == 0) {
                         stringBuilder.append("⚠️Ожидаются обработанне данные для отправки рассылки на сервера <b>Telegram</b>⚠️\n");
-                    }else if (percentage == 100){
+                    } else if (percentage == 100) {
                         stringBuilder.append("✅Рассылка успешно обработана\n");
-                    }else {
+                    } else {
                         stringBuilder.append("⚠️Идёт отправка обработанной рассылки на сервера <b>Telegram</b>⚠️\n");
                     }
                     stringBuilder.append("      ").append(percentage).append("%\n");
