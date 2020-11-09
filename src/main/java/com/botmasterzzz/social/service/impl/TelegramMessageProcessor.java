@@ -261,6 +261,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                 }
                 case "MailingTextMessage": {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    method.setReplyToMessageId(null);
                     String chatId = method.getChatId();
                     boolean chatContains = chatList.contains(chatId);
                     if (chatContains) {
@@ -402,6 +403,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                 }
                 case "MailingResetMessage": {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    method.setReplyToMessageId(null);
                     String chatId = method.getChatId();
                     int size = chatList.size();
                     int validSize = validChatList.size();
