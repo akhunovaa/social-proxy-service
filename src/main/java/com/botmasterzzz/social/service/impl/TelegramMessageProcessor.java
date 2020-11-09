@@ -408,10 +408,9 @@ public class TelegramMessageProcessor implements MessageProcess {
                     chatList.clear();
                     validChatList.clear();
                     try {
-                        String message = "Was: " + size + "\nValid chatList size: " + validSize + " \nDone!" + "\n" + method.getText();
+                        String message = "Сброшен счетчик по кол-ву отправленных сообщений: " + size + "\nИз успешно доставлено адресатам: " + validSize + "\n\n" + method.getText();
                         method.setText(message);
-                        Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
-                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, message));
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
                     } catch (TelegramApiException exception) {
                         LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
                     }
@@ -423,9 +422,9 @@ public class TelegramMessageProcessor implements MessageProcess {
                     int size = chatList.size();
                     int validSize = validChatList.size();
                     try {
-                        String message = "ChatList size: " + size + "\nValid chatList size: " + validSize + " \nDone!" + "\n";
+                        String message = "Cчётчик по кол-ву отправленных сообщений: " + size + "\nИз успешно доставлено адресатам: " + validSize + "\n";
                         method.setText(message);
-                        Message responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        botInstanceContainer.getBotInstance(instanceId).execute(method);
                         botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, message));
                     } catch (TelegramApiException exception) {
                         LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
