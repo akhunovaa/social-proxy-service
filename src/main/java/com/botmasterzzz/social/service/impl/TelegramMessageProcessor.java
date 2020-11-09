@@ -404,6 +404,21 @@ public class TelegramMessageProcessor implements MessageProcess {
                 case "MailingResetMessage": {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
                     method.setReplyToMessageId(null);
+                    InlineKeyboardMarkup cancelReplyInnerKeyboard = new InlineKeyboardMarkup();
+                    List<List<InlineKeyboardButton>> inlineKeyboardButtons = new ArrayList<>();
+                    List<InlineKeyboardButton> inlineKeyboardButtonsFirstRow = new ArrayList<>();
+
+                    InlineKeyboardButton cancelInlineButton = new InlineKeyboardButton();
+                    cancelInlineButton.setText("❌Закрыть");
+                    try {
+                        cancelInlineButton.setCallbackData(objectMapper.writeValueAsString(new CallBackData("mailcnsl")));
+                    } catch (JsonProcessingException exception) {
+                        exception.printStackTrace();
+                    }
+                    inlineKeyboardButtonsFirstRow.add(cancelInlineButton);
+                    inlineKeyboardButtons.add(inlineKeyboardButtonsFirstRow);
+                    cancelReplyInnerKeyboard.setKeyboard(inlineKeyboardButtons);
+                    method.setReplyMarkup(cancelReplyInnerKeyboard);
                     String chatId = method.getChatId();
                     int size = chatList.size();
                     int validSize = validChatList.size();
@@ -443,11 +458,26 @@ public class TelegramMessageProcessor implements MessageProcess {
                         stringBuilder.append(" ");
                     }
                     stringBuilder.append("]");
+                    InlineKeyboardMarkup cancelReplyInnerKeyboard = new InlineKeyboardMarkup();
+                    List<List<InlineKeyboardButton>> inlineKeyboardButtons = new ArrayList<>();
+                    List<InlineKeyboardButton> inlineKeyboardButtonsFirstRow = new ArrayList<>();
+
+                    InlineKeyboardButton cancelInlineButton = new InlineKeyboardButton();
+                    cancelInlineButton.setText("❌Закрыть");
+                    try {
+                        cancelInlineButton.setCallbackData(objectMapper.writeValueAsString(new CallBackData("mailcnsl")));
+                    } catch (JsonProcessingException exception) {
+                        exception.printStackTrace();
+                    }
+                    inlineKeyboardButtonsFirstRow.add(cancelInlineButton);
+                    inlineKeyboardButtons.add(inlineKeyboardButtonsFirstRow);
+                    cancelReplyInnerKeyboard.setKeyboard(inlineKeyboardButtons);
+                    method.setReplyMarkup(cancelReplyInnerKeyboard);
                     try {
                         String message = "Cчётчик по кол-ву отправленных сообщений: " + size + "\nИз успешно доставлено адресатам: " + validSize + "\n\n";
                         method.setText(message + stringBuilder.toString());
                         botInstanceContainer.getBotInstance(instanceId).execute(method);
-                        botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, message));
+                        //botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, message));
                     } catch (TelegramApiException exception) {
                         LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, exception);
                     }
