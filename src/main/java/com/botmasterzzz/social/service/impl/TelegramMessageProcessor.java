@@ -443,11 +443,11 @@ public class TelegramMessageProcessor implements MessageProcess {
                     method.setReplyToMessageId(null);
                     StringBuilder stringBuilder = new StringBuilder();
                     if (percentage == 0) {
-                        stringBuilder.append("⚠️Ожидаются обработаные данные для отправки рассылки на сервера <b>Telegram</b>️\n");
+                        stringBuilder.append("⚠️Ожидаются обработаные данные для отправки рассылки на сервера <b>Telegram</b>️ \n");
                     } else if (percentage == 100) {
-                        stringBuilder.append("✅Рассылка успешно обработана\n");
+                        stringBuilder.append("✅Рассылка успешно обработана \n");
                     } else {
-                        stringBuilder.append("⚠️Идёт отправка обработанной рассылки на сервера <b>Telegram</b>️\n");
+                        stringBuilder.append("⚠️Идёт отправка обработанной рассылки на сервера <b>Telegram</b> ️\n");
                     }
                     stringBuilder.append("      ").append(percentage).append("%\n");
                     stringBuilder.append("[");
