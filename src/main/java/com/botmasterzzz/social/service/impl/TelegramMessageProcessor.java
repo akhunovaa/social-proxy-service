@@ -453,6 +453,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                 }
                 default: {
                     SendMessage method = objectMapper.readValue(apiMethod.getData(), SendMessage.class);
+                    method.setReplyToMessageId(null);
                     //boolean loading = kafkaKeyDTO.isLoading();
                     String chatId = method.getChatId();
                     Long currentTime = System.currentTimeMillis();
