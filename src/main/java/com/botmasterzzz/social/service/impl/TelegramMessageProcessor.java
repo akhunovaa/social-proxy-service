@@ -113,7 +113,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                             String fileName = method.getVideo().getAttachName();
                             File uploadVideoFile = new File(fileName);
                             if (uploadVideoFile.exists()) {
-                                method.setVideoInputFile(new InputFile(uploadVideoFile, "upload_file"));
+                                method.setVideoInputFile(new InputFile(uploadVideoFile, uploadVideoFile.getName()));
                                 LOGGER.info("File from local send {}", uploadVideoFile.getAbsolutePath());
                             }
                             Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
