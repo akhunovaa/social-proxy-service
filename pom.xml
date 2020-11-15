@@ -62,7 +62,7 @@
         <java-uuid-generator.version>4.0.1</java-uuid-generator.version>
         <modelmapper.version>2.3.7</modelmapper.version>
         <javax.mail.version>1.4.7</javax.mail.version>
-        <telegram-bot.version>1.7</telegram-bot.version>
+        <telegram-bot.version>1.8</telegram-bot.version>
     </properties>
 
     <profiles>

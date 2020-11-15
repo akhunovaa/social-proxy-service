@@ -148,12 +148,28 @@ public class TelegramMessageProcessor implements MessageProcess {
                         String fileName = method.getDocument().getAttachName();
                         File uploadDocument = new File(fileName);
                         if (uploadDocument.exists()) {
+                            String mediaName = fileName.contains(".xlsx") ? "report_file_" + method.getChatId() + ".xlsx" : method.getMediaName();
+                            method.setDocumentInput(new InputFile(uploadDocument, mediaName));
+                            method.setMediaName(null);
+                            if (null != method.getThumb() && null != method.getThumb().getAttachName()) {
+                                String thumbPath = method.getThumb().getAttachName();
+                                File thumbFile = new File(thumbPath);
+                                if (thumbFile.exists()) {
+                                    String thumbnailsMediaName = mediaName.substring(0, mediaName.lastIndexOf(".mp3")) + ".jpg";
+                                    method.setThumb(new InputFile(thumbFile, thumbnailsMediaName));
+                                }
+                            } else if(null != method.getThumb() && null == method.getThumb().getAttachName()){
+                                method.getThumb().setMedia(mediaName);
+                            }
                             sendChatAction.setAction(ActionType.UPLOADDOCUMENT);
-                            method.setDocumentInput(new InputFile(uploadDocument, "report_file_" + method.getChatId() + ".xlsx"));
                             LOGGER.info("File from local send {}", uploadDocument.getAbsolutePath());
                         } else {
+                            if(null != method.getThumb() && null == method.getThumb().getAttachName()){
+                                method.getThumb().setMedia(fileName);
+                            }
                             sendChatAction.setAction(ActionType.UPLOADVIDEO);
                         }
+
                         if (bannedTime <= currentTime) {
                             botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                             Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeDocument(method);
