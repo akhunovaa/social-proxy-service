@@ -87,9 +87,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a photo to chat id: {} Telegram", chatId, telegramApiException);
                         String exceptionMessage = telegramApiException.getMessage();
-                        String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
-                        Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
-                        String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                        String exceptionMessageToSend = "Exception Message => " + exceptionMessage;
                         try {
                             botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
                         } catch (TelegramApiException exception) {
@@ -127,11 +125,9 @@ public class TelegramMessageProcessor implements MessageProcess {
 //                            kafkaMessageTemplate.send(topicName, fileName, responseMessage);
 //                        }
                     } catch (TelegramApiException telegramApiException) {
-                        LOGGER.error("Error to send a video to chat id: {} Telegram", chatId, telegramApiException);
+                        LOGGER.error("Error to send a photo to chat id: {} Telegram", chatId, telegramApiException);
                         String exceptionMessage = telegramApiException.getMessage();
-                        String apiException = ((TelegramApiRequestException) telegramApiException).getApiResponse();
-                        Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
-                        String exceptionMessageToSend = "Exception Message => " + exceptionMessage + " \n" + "Exception Message => " + apiException + " \n" + "Error Code => " + errorCode;
+                        String exceptionMessageToSend = "Exception Message => " + exceptionMessage;
                         try {
                             botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
                         } catch (TelegramApiException exception) {
@@ -192,7 +188,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         if (bannedTime <= currentTime) {
                             botInstanceContainer.getBotInstance(instanceId).execute(method);
                         } else {
-                            blockedList.put(requestedUserId, bannedTime + ONE_MINUTE_IN_MILLIS / 10);
+                            blockedList.put(requestedUserId, bannedTime + ONE_MINUTE_IN_MILLIS / 20);
                         }
                         //Message responseMessage = (Message) botInstanceContainer.getBotInstance(instanceId).execute(method);
                         //process(responseMessage, kafkaKey);
@@ -201,7 +197,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         Integer errorCode = ((TelegramApiRequestException) telegramApiException).getErrorCode();
                         if (errorCode == TO_MANY_REQUESTS_ERROR_CODE) {
                             bannedTime = blockedList.getOrDefault(requestedUserId, currentTime);
-                            blockedList.put(requestedUserId, bannedTime + ONE_MINUTE_IN_MILLIS / 4);
+                            blockedList.put(requestedUserId, bannedTime + ONE_MINUTE_IN_MILLIS / 6);
                         }
                     }
                     break;
