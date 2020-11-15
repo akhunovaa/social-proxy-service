@@ -285,14 +285,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                             process(responseMessage, kafkaKey);
                             validChatList.add(chatId);
                         } catch (TelegramApiException telegramApiException) {
-//                            LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
-//                            String exceptionMessage = telegramApiException.getMessage();
-//                            String exceptionMessageToSend = "Exception Message => " + exceptionMessage;
-//                            try {
-//                                botInstanceContainer.getBotInstance(instanceId).execute(sendBlockActionToAdmin(chatId, exceptionMessageToSend));
-//                            } catch (TelegramApiException exception) {
-//                                LOGGER.error("Error to send a message to chat id: {} Telegram", chatId, telegramApiException);
-//                            }
+                            LOGGER.error("Error to send a MailingMessage SendMessage to Telegram", telegramApiException);
                         }
                     }
                     break;
