@@ -23,7 +23,7 @@ public class GlobalExceptionHandler extends AbstractController {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public void handler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        LOGGER.error("REST Error", ex);
+        LOGGER.error("REST Error exception", ex);
         String err;
         if (ex instanceof MethodArgumentNotValidException) {
             String message = Optional.of(((MethodArgumentNotValidException) ex).getBindingResult().getFieldError().getDefaultMessage()).orElse("Введены неверные данные");
