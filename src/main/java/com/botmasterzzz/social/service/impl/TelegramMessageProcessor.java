@@ -1,16 +1,11 @@
 package com.botmasterzzz.social.service.impl;
 
-import com.botmasterzzz.bot.api.impl.methods.ActionType;
-import com.botmasterzzz.bot.api.impl.methods.AnswerCallbackQuery;
-import com.botmasterzzz.bot.api.impl.methods.AnswerInlineQuery;
-import com.botmasterzzz.bot.api.impl.methods.ParseMode;
+import com.botmasterzzz.bot.api.impl.methods.*;
 import com.botmasterzzz.bot.api.impl.methods.send.*;
 import com.botmasterzzz.bot.api.impl.methods.update.DeleteMessage;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageReplyMarkup;
 import com.botmasterzzz.bot.api.impl.methods.update.EditMessageText;
-import com.botmasterzzz.bot.api.impl.objects.InputFile;
-import com.botmasterzzz.bot.api.impl.objects.Message;
-import com.botmasterzzz.bot.api.impl.objects.OutgoingMessage;
+import com.botmasterzzz.bot.api.impl.objects.*;
 import com.botmasterzzz.bot.api.impl.objects.replykeyboard.InlineKeyboardMarkup;
 import com.botmasterzzz.bot.api.impl.objects.replykeyboard.buttons.InlineKeyboardButton;
 import com.botmasterzzz.bot.exceptions.TelegramApiException;
@@ -49,12 +44,18 @@ public class TelegramMessageProcessor implements MessageProcess {
 
     private final ObjectMapper objectMapper;
     private final KafkaTemplate<Long, Message> kafkaMessageTemplate;
+    private final KafkaTemplate<Long, ProfileInfoResponse> kafkaProfileInfoTemplate;
+
     @Value(value = "${telegram.response.messages.topic.name}")
     private String topicName;
 
-    public TelegramMessageProcessor(ObjectMapper objectMapper, KafkaTemplate<Long, Message> kafkaMessageTemplate) {
+    @Value(value = "${telegram.response.photo.topic.name}")
+    private String forProfilePhotosTopicName;
+
+    public TelegramMessageProcessor(ObjectMapper objectMapper, KafkaTemplate<Long, Message> kafkaMessageTemplate, KafkaTemplate<Long, ProfileInfoResponse> kafkaProfileInfoTemplate) {
         this.objectMapper = objectMapper;
         this.kafkaMessageTemplate = kafkaMessageTemplate;
+        this.kafkaProfileInfoTemplate = kafkaProfileInfoTemplate;
     }
 
     @Async
@@ -224,6 +225,20 @@ public class TelegramMessageProcessor implements MessageProcess {
                         botInstanceContainer.getBotInstance(instanceId).execute(method);
                     } catch (TelegramApiException telegramApiException) {
                         LOGGER.error("Error to send a DeleteMessage to Telegram", telegramApiException);
+                    }
+                    break;
+                }
+                case "GetUserProfilePhotos": {
+                    GetUserProfilePhotos method = objectMapper.readValue(apiMethod.getData(), GetUserProfilePhotos.class);
+                    Long requestedUserId = Long.valueOf(objectMapper.readValue(apiMethod.getData(), GetUserProfilePhotos.class).getUserId());
+                    try {
+                        UserProfilePhotos responseMessage = botInstanceContainer.getBotInstance(instanceId).execute(method);
+                        ProfileInfoResponse profileInfoResponse = new ProfileInfoResponse();
+                        profileInfoResponse.setUserProfilePhotos(responseMessage);
+                        profileInfoResponse.setUsersTelegramIdentifier(requestedUserId);
+                        process(profileInfoResponse, kafkaKey);
+                    } catch (TelegramApiException telegramApiException) {
+                        LOGGER.error("Error to send a GetUserProfilePhotos to Telegram", telegramApiException);
                     }
                     break;
                 }
@@ -521,12 +536,22 @@ public class TelegramMessageProcessor implements MessageProcess {
         }
     }
 
+    @Async
     @Override
     public void process(Message message, Long kafkaKey) {
         Long instanceId = kafkaKey;
         LOGGER.info("Message response for an instance: {} message: {}", instanceId, message.toString());
         LOGGER.info("<= sending {}", message.toString());
         kafkaMessageTemplate.send(topicName, instanceId, message);
+    }
+
+    @Async
+    @Override
+    public void process(ProfileInfoResponse profileInfoResponse, Long kafkaKey) {
+        Long instanceId = kafkaKey;
+        LOGGER.info("UserProfilePhotos response for an instance: {} message: {}", instanceId, profileInfoResponse.toString());
+        LOGGER.info("<= sending {}", profileInfoResponse.toString());
+        kafkaProfileInfoTemplate.send(forProfilePhotosTopicName, instanceId, profileInfoResponse);
     }
 
     private SendMessage sendBlockActionToAdmin(String chatId, String cause) {

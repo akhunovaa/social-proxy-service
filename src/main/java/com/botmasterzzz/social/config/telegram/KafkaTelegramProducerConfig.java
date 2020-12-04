@@ -1,6 +1,7 @@
 package com.botmasterzzz.social.config.telegram;
 
 import com.botmasterzzz.bot.api.impl.objects.Message;
+import com.botmasterzzz.bot.api.impl.objects.ProfileInfoResponse;
 import com.botmasterzzz.bot.api.impl.objects.Update;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongSerializer;
@@ -48,6 +49,11 @@ public class KafkaTelegramProducerConfig {
     }
 
     @Bean
+    public ProducerFactory<Long, ProfileInfoResponse> responseProfilePhotosMessageProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }
+
+    @Bean
     public KafkaTemplate<Long, Update> kafkaTemplate() {
         KafkaTemplate<Long, Update> template = new KafkaTemplate<>(producerFactory());
         template.setMessageConverter(new StringJsonMessageConverter());
@@ -57,6 +63,13 @@ public class KafkaTelegramProducerConfig {
     @Bean
     public KafkaTemplate<Long, Message> kafkaMessageTemplate() {
         KafkaTemplate<Long, Message> template = new KafkaTemplate<>(responseMessageProducerFactory());
+        template.setMessageConverter(new StringJsonMessageConverter());
+        return template;
+    }
+
+    @Bean
+    public KafkaTemplate<Long, ProfileInfoResponse> kafkaProfileInfoTemplate() {
+        KafkaTemplate<Long, ProfileInfoResponse> template = new KafkaTemplate<>(responseProfilePhotosMessageProducerFactory());
         template.setMessageConverter(new StringJsonMessageConverter());
         return template;
     }
