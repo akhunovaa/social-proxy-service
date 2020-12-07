@@ -445,7 +445,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                     chatList.clear();
                     validChatList.clear();
                     try {
-                        String message = "Сброшен счетчик по кол-ву отправленных сообщений: " + size + "\nИз успешно доставлено адресатам: " + validSize + "\n\n" + method.getText();
+                        String message = "Сброшен счетчик по кол-ву отправленных сообщений: " + size + "\nИз них успешно было доставлено адресатам: " + validSize + "\n\n" + method.getText();
                         method.setText(message);
                         botInstanceContainer.getBotInstance(instanceId).execute(method);
                     } catch (TelegramApiException exception) {
