@@ -110,7 +110,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                         if (bannedTime <= currentTime) {
                             botInstanceContainer.getBotInstance(instanceId).execute(sendChatAction);
                             String fileName = method.getVideo().getAttachName();
-                            String thumbnailPath = method.getThumbNailPath();
+                            String thumbnailPath = null != method.getThumbNailPath() ? method.getThumbNailPath() : "";
                             File uploadVideoFile = new File(fileName);
                             File thumbnailFile = new File(thumbnailPath);
                             if (uploadVideoFile.exists()) {
