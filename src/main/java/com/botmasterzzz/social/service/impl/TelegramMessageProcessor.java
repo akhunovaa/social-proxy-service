@@ -118,8 +118,9 @@ public class TelegramMessageProcessor implements MessageProcess {
                                 LOGGER.info("File from local send {}", uploadVideoFile.getAbsolutePath());
                             }
                             if (thumbnailFile.exists()) {
+                                method.setThumbNailPath(null);
                                 method.setThumb(new InputFile(thumbnailFile, thumbnailFile.getName()));
-                                LOGGER.info("File from local send {}", uploadVideoFile.getAbsolutePath());
+                                LOGGER.info("File from local send {}", thumbnailFile.getAbsolutePath());
                             }
                             Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                             LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
