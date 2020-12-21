@@ -120,7 +120,7 @@ public class TelegramMessageProcessor implements MessageProcess {
                             if (thumbnailFile.exists()) {
                                 method.setThumbNailPath(null);
                                 method.setThumb(new InputFile(thumbnailFile, thumbnailFile.getName()));
-                                LOGGER.info("File from local send {}", thumbnailFile.getAbsolutePath());
+                                LOGGER.info("Thumbnail File from local send {}", thumbnailFile.getAbsolutePath());
                             }
                             Message responseMessage = botInstanceContainer.getBotInstance(instanceId).executeVideo(method);
                             LOGGER.info("Successfully received response message from Telegram: {}", objectMapper.writeValueAsString(responseMessage));
@@ -133,7 +133,7 @@ public class TelegramMessageProcessor implements MessageProcess {
 //                            kafkaMessageTemplate.send(topicName, fileName, responseMessage);
 //                        }
                     } catch (TelegramApiException telegramApiException) {
-                        LOGGER.error("Error to send a photo to chat id: {} Telegram", chatId, telegramApiException);
+                        LOGGER.error("Error to send a video to chat id: {} Telegram", chatId, telegramApiException);
                         String exceptionMessage = telegramApiException.getMessage();
                         String exceptionMessageToSend = "Exception Message => " + exceptionMessage;
                         try {
